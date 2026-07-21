@@ -1,3 +1,4 @@
+using Lumbre.Game.Client.Player;
 using Lumbre.Game.Domain.Missions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,14 +11,16 @@ namespace Lumbre.Game.Client.Missions
         [SerializeField] private H5NaraController nara;
         [SerializeField] private Transform player;
         [SerializeField] private Text label;
+        [SerializeField] private H3PlayerInputReader inputReader;
 
         public void Configure(H5MissionRuntime missionRuntime, H5NaraController missionNpc,
-            Transform playerTransform, Text hudLabel)
+            Transform playerTransform, Text hudLabel, H3PlayerInputReader reader = null)
         {
             runtime = missionRuntime;
             nara = missionNpc;
             player = playerTransform;
             label = hudLabel;
+            inputReader = reader;
         }
 
         private void Awake()
@@ -26,6 +29,7 @@ namespace Lumbre.Game.Client.Missions
             nara ??= FindFirstObjectByType<H5NaraController>();
             player ??= GameObject.FindWithTag("Player")?.transform;
             label ??= GetComponent<Text>();
+            inputReader ??= player?.GetComponent<H3PlayerInputReader>();
         }
 
         private void Update()
@@ -46,15 +50,20 @@ namespace Lumbre.Game.Client.Missions
             };
 
             var prompt = string.Empty;
+            var touchPrompt = inputReader != null && inputReader.IsTouchControlSchemeActive;
             if (nara != null && player != null && nara.IsInRange(player))
             {
-                prompt = "  ·  F / HABLAR CON NARA";
+                prompt = touchPrompt
+                    ? "  ·  HABLAR CON NARA"
+                    : "  ·  F / HABLAR CON NARA";
             }
 
             if (runtime.Inventory.Contains(H5MissionModel.RewardItemId)
                 && !runtime.Equipment.EquippedItem.HasValue)
             {
-                prompt += "  ·  G / EQUIPAR RECOMPENSA";
+                prompt += touchPrompt
+                    ? "  ·  EQUIPAR RECOMPENSA"
+                    : "  ·  G / EQUIPAR RECOMPENSA";
             }
 
             label.text = prompt.Length == 0 ? string.Empty : text + prompt;

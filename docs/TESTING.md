@@ -352,6 +352,17 @@ Resultado H9.1 de esta estación:
 
 La corrección H9.1 sincroniza el offset de composición serializado del binding H3 con el `CinemachineFollow` H9; no modifica gameplay ni contratos de dominio.
 
+## H9.2 — Regresión de layout Android
+
+Además de las suites H3–H8, `H9VerticalSlicePolishPlayModeTests` comprueba el snapshot inicial del HUD, el área táctil/visual del joystick, el viewport completo de cámara y los cinco puntos de spawn dentro de `H9_CameraBounds`. El builder valida también que los elementos principales de UI sean únicos y permanezcan dentro de la safe area en estas resoluciones landscape: 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720.
+
+Resultado H9.2 de esta estación:
+
+- EditMode: 23/23 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-2-editmode.xml`.
+- PlayMode: 11/11 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-2-playmode.xml`.
+- Build → Validate: dos ciclos completados con código 0, sin duplicar Safe Area, confiner, CameraBounds, HUD, botones ni componentes.
+- Validación física: pendiente; no se consideran estos resultados sustitutos de una prueba en teléfono.
+
 ## Criterio de calidad H4–H8
 
 - cero errores de compilación;

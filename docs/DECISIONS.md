@@ -364,3 +364,12 @@
 - **Decisión:** las suites se ejecutan con `-runTests` sin `-quit`; H9.1 registra por separado los XML, el APK y la evidencia física. Si `adb devices -l` está vacío, el resultado es `BLOQUEADO`, no `APROBADO`.
 - **Motivo:** evita confundir una compilación o una prueba de Editor con evidencia de hardware y deja un procedimiento reproducible para la revisión técnica.
 - **Consecuencias:** EditMode 23/23, PlayMode 9/9, builder idempotente y APK están verificados; instalación, arranques, capturas, logcat y métricas quedan pendientes de un dispositivo real. No se inicia H10 ni se cambia la versión.
+
+## DEC-0039 — H9.2 corrige presentación sin tocar contratos de gameplay
+
+- **Fecha:** 2026-07-21
+- **Estado:** aprobada durante H9.2
+- **Problema:** la preparación física de H9 mostró riesgos de recorte en controles superiores, una franja inferior del viewport, HUD vacío durante la primera resolución, exceso visual del joystick y prompts de teclado en touch.
+- **Decisión:** corregir safe area, viewport, inicialización del HUD, densidad de paneles, representación visual del joystick y texto de interacción. El área táctil permanece amplia, se reutiliza el esquema `Touch` existente y los spawns se validan dentro del volumen jugable.
+- **Motivo:** resuelve defectos de presentación verificables sin modificar combate, IA, misión, progresión, inventario, persistencia, contratos de dominio ni arquitectura offline→online.
+- **Consecuencias:** la matriz automática cubre cinco resoluciones landscape y la prueba física H9.1/H9.2 sigue siendo obligatoria; no se presentan capturas o métricas de teléfono mientras ADB no detecte hardware.

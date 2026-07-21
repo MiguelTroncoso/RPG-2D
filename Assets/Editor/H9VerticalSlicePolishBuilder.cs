@@ -24,6 +24,9 @@ namespace Lumbre.Game.Editor
         private const string ScenePath = ProjectConstants.VerticalSliceScenePath;
         private const float CameraZoom = 8.2f;
         private const float SafeAreaPadding = 18f;
+        private const float BackdropWidth = 42f;
+        private const float JoystickTouchSize = 228f;
+        private const float JoystickVisualSize = 168f;
 
         public static void Build()
         {
@@ -69,7 +72,161 @@ namespace Lumbre.Game.Editor
                 throw new InvalidOperationException("H9 presentation validation failed.");
             }
 
+            ValidateLayout(canvas, safeRoot.transform);
+            ValidateSpawns(bounds);
+
             Debug.Log($"H9 presentation validation passed in {scene.name}.");
+        }
+
+        private static void ValidateLayout(Canvas canvas, Transform root)
+        {
+            var requiredUi = new[]
+            {
+                "VirtualJoystick_Base", "H4_AttackButton", "H4B_DefenseButton", "H4B_AreaButton",
+                "H5_InteractButton", "H5_EquipButton", "H7_StatusPanel", "H7_MissionPanel",
+                "H5_MissionHud"
+            };
+            foreach (var name in requiredUi)
+            {
+                if (CountUi(name, root) != 1)
+                {
+                    throw new InvalidOperationException($"H9 layout contains an invalid '{name}' count.");
+                }
+            }
+
+            var camera = GameObject.Find("Main Camera")?.GetComponent<Camera>();
+            if (camera == null || camera.rect != new Rect(0f, 0f, 1f, 1f))
+            {
+                throw new InvalidOperationException("H9 camera viewport must fill the screen.");
+            }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler == null || scaler.referenceResolution != new Vector2(1920f, 1080f))
+            {
+                throw new InvalidOperationException("H9 layout requires the 1920x1080 reference canvas.");
+            }
+
+            var resolutions = new[]
+            {
+                new Vector2(1920f, 1080f),
+                new Vector2(2400f, 1080f),
+                new Vector2(2340f, 1080f),
+                new Vector2(2560f, 1080f),
+                new Vector2(1280f, 720f)
+            };
+            foreach (var resolution in resolutions)
+            {
+                var scale = CalculateCanvasScale(resolution, scaler);
+                var safeSize = resolution / scale - Vector2.one * (SafeAreaPadding * 2f);
+                ValidateTopRight(root, "H4_AttackButton", new Vector2(-120f, -112f), safeSize,
+                    resolution);
+                ValidateTopRight(root, "H4B_DefenseButton", new Vector2(-284f, -112f), safeSize,
+                    resolution);
+                ValidateTopRight(root, "H4B_AreaButton", new Vector2(-120f, -276f), safeSize,
+                    resolution);
+                ValidateTopRight(root, "H5_InteractButton", new Vector2(-284f, -276f), safeSize,
+                    resolution);
+                ValidateTopRight(root, "H5_EquipButton", new Vector2(-448f, -276f), safeSize,
+                    resolution);
+                ValidateBottomLeft(root, "VirtualJoystick_Base", new Vector2(150f, 150f),
+                    new Vector2(JoystickTouchSize, JoystickTouchSize), safeSize, resolution);
+                ValidateTopLeft(root, "H7_StatusPanel", new Vector2(24f, -24f),
+                    new Vector2(610f, 146f), safeSize, resolution);
+                ValidateTopLeft(root, "H7_MissionPanel", new Vector2(24f, -188f),
+                    new Vector2(650f, 70f), safeSize, resolution);
+                ValidateTopLeft(root, "H5_MissionHud", new Vector2(24f, -270f),
+                    new Vector2(700f, 48f), safeSize, resolution);
+            }
+        }
+
+        private static void ValidateSpawns(Collider2D cameraBounds)
+        {
+            var spawnNames = new[]
+            {
+                "Player_RespawnPoint", "Mordeluz_1_SpawnPoint", "Mordeluz_2_SpawnPoint",
+                "Mordeluz_3_SpawnPoint", "Mordeluz_Resonante_SpawnPoint"
+            };
+            var obstacleMask = 1 << ProjectLayers.WorldObstacle;
+            foreach (var name in spawnNames)
+            {
+                var spawn = GameObject.Find(name);
+                if (spawn == null)
+                {
+                    throw new InvalidOperationException($"H9 spawn '{name}' is missing.");
+                }
+
+                var point = spawn.transform.position;
+                var cameraBoundsWorld = cameraBounds.bounds;
+                var insideCameraBounds = point.x >= cameraBoundsWorld.min.x
+                    && point.x <= cameraBoundsWorld.max.x
+                    && point.y >= cameraBoundsWorld.min.y
+                    && point.y <= cameraBoundsWorld.max.y;
+                if (!insideCameraBounds)
+                {
+                    throw new InvalidOperationException($"H9 spawn '{name}' is outside camera bounds.");
+                }
+
+                var overlapsObstacle = Physics2D.OverlapCircleAll(point, 0.2f, obstacleMask);
+                if (overlapsObstacle.Length > 0)
+                {
+                    throw new InvalidOperationException($"H9 spawn '{name}' overlaps a world obstacle.");
+                }
+            }
+        }
+
+        private static void ValidateTopRight(Transform root, string name, Vector2 position,
+            Vector2 safeSize, Vector2 resolution)
+        {
+            var rect = FindUi(name, root)?.GetComponent<RectTransform>();
+            if (rect == null)
+            {
+                throw new InvalidOperationException($"H9 layout element '{name}' is missing.");
+            }
+
+            var right = safeSize.x + position.x;
+            var top = safeSize.y + position.y;
+            if (right - rect.sizeDelta.x < 0f || top - rect.sizeDelta.y < 0f
+                || right > safeSize.x || top > safeSize.y)
+            {
+                throw new InvalidOperationException(
+                    $"H9 '{name}' leaves the safe area at {resolution.x:0}x{resolution.y:0}.");
+            }
+        }
+
+        private static void ValidateBottomLeft(Transform root, string name, Vector2 position,
+            Vector2 size, Vector2 safeSize, Vector2 resolution)
+        {
+            if (position.x < 0f || position.y < 0f || position.x + size.x > safeSize.x
+                || position.y + size.y > safeSize.y)
+            {
+                throw new InvalidOperationException(
+                    $"H9 '{name}' leaves the safe area at {resolution.x:0}x{resolution.y:0}.");
+            }
+        }
+
+        private static void ValidateTopLeft(Transform root, string name, Vector2 position,
+            Vector2 size, Vector2 safeSize, Vector2 resolution)
+        {
+            if (position.x < 0f || safeSize.y + position.y - size.y < 0f
+                || position.x + size.x > safeSize.x)
+            {
+                throw new InvalidOperationException(
+                    $"H9 '{name}' leaves the safe area at {resolution.x:0}x{resolution.y:0}.");
+            }
+        }
+
+        private static float CalculateCanvasScale(Vector2 resolution, CanvasScaler scaler)
+        {
+            var widthScale = resolution.x / scaler.referenceResolution.x;
+            var heightScale = resolution.y / scaler.referenceResolution.y;
+            return Mathf.Pow(widthScale, 1f - scaler.matchWidthOrHeight)
+                * Mathf.Pow(heightScale, scaler.matchWidthOrHeight);
+        }
+
+        private static int CountUi(string name, Transform root)
+        {
+            return root.GetComponentsInChildren<Transform>(true)
+                .Count(transform => transform.name == name);
         }
 
         public static void BuildAndroidDevelopment()
@@ -235,11 +392,27 @@ namespace Lumbre.Game.Editor
             var joystick = FindUi("VirtualJoystick_Base", root);
             if (joystick != null)
             {
-                SetBottomLeft(joystick, new Vector2(150f, 150f), new Vector2(228f, 228f));
+                SetBottomLeft(joystick, new Vector2(150f, 150f),
+                    new Vector2(JoystickTouchSize, JoystickTouchSize));
                 var image = joystick.GetComponent<Image>();
                 if (image != null)
                 {
-                    image.color = new Color(0.08f, 0.12f, 0.2f, 0.58f);
+                    image.color = Color.clear;
+                    image.raycastTarget = false;
+                    var visual = FindUi("VirtualJoystick_Visual", joystick.transform);
+                    if (visual == null)
+                    {
+                        visual = new GameObject("VirtualJoystick_Visual", typeof(RectTransform), typeof(Image));
+                        visual.transform.SetParent(joystick.transform, false);
+                    }
+
+                    visual.layer = ProjectLayers.PlayerUi;
+                    SetCenter(visual, Vector2.zero, new Vector2(JoystickVisualSize, JoystickVisualSize));
+                    var visualImage = GetOrAdd<Image>(visual);
+                    visualImage.sprite = image.sprite;
+                    visualImage.type = image.type;
+                    visualImage.color = new Color(0.08f, 0.12f, 0.2f, 0.58f);
+                    visualImage.raycastTarget = false;
                 }
 
                 var handle = FindUi("VirtualJoystick_Handle", joystick.transform);
@@ -250,17 +423,17 @@ namespace Lumbre.Game.Editor
                     handleRect.anchorMax = new Vector2(0.5f, 0.5f);
                     handleRect.pivot = new Vector2(0.5f, 0.5f);
                     handleRect.anchoredPosition = Vector2.zero;
-                    handleRect.sizeDelta = new Vector2(120f, 120f);
+                    handleRect.sizeDelta = new Vector2(96f, 96f);
                     SetProperty(handle.GetComponent("UnityEngine.InputSystem.OnScreen.OnScreenStick"),
                         "movementRange", 82f);
                 }
             }
 
-            ConfigureButton(root, "H4_AttackButton", new Vector2(-120f, 112f));
-            ConfigureButton(root, "H4B_DefenseButton", new Vector2(-284f, 112f));
-            ConfigureButton(root, "H4B_AreaButton", new Vector2(-120f, 276f));
-            ConfigureButton(root, "H5_InteractButton", new Vector2(-284f, 276f));
-            ConfigureButton(root, "H5_EquipButton", new Vector2(-448f, 276f));
+            ConfigureButton(root, "H4_AttackButton", new Vector2(-120f, -112f));
+            ConfigureButton(root, "H4B_DefenseButton", new Vector2(-284f, -112f));
+            ConfigureButton(root, "H4B_AreaButton", new Vector2(-120f, -276f));
+            ConfigureButton(root, "H5_InteractButton", new Vector2(-284f, -276f));
+            ConfigureButton(root, "H5_EquipButton", new Vector2(-448f, -276f));
         }
 
         private static void ConfigureButton(Transform root, string name, Vector2 position)
@@ -271,7 +444,7 @@ namespace Lumbre.Game.Editor
                 return;
             }
 
-            SetBottomRight(button, position, new Vector2(148f, 148f));
+            SetTopRight(button, position, new Vector2(148f, 148f));
             var control = button.GetComponent<Button>();
             if (control != null)
             {
@@ -291,28 +464,28 @@ namespace Lumbre.Game.Editor
             var statusPanel = FindUi("H7_StatusPanel", root);
             if (statusPanel != null)
             {
-                SetTopLeft(statusPanel, new Vector2(24f, -24f), new Vector2(640f, 170f));
-                ConfigureText(FindUi("Status", statusPanel.transform), 17, new Vector2(18f, -14f),
-                    new Vector2(600f, 54f));
-                ConfigureBar(FindUi("LifeBar", statusPanel.transform), new Vector2(18f, -74f), 590f);
-                ConfigureBar(FindUi("HeatBar", statusPanel.transform), new Vector2(18f, -100f), 590f);
+                SetTopLeft(statusPanel, new Vector2(24f, -24f), new Vector2(610f, 146f));
+                ConfigureText(FindUi("Status", statusPanel.transform), 19, new Vector2(18f, -12f),
+                    new Vector2(574f, 50f));
+                ConfigureBar(FindUi("LifeBar", statusPanel.transform), new Vector2(18f, -68f), 568f);
+                ConfigureBar(FindUi("HeatBar", statusPanel.transform), new Vector2(18f, -92f), 568f);
                 ConfigureBar(FindUi("ExperienceBar", statusPanel.transform),
-                    new Vector2(18f, -126f), 590f);
+                    new Vector2(18f, -116f), 568f);
             }
 
             var missionPanel = FindUi("H7_MissionPanel", root);
             if (missionPanel != null)
             {
-                SetTopLeft(missionPanel, new Vector2(24f, -208f), new Vector2(720f, 82f));
-                ConfigureText(FindUi("Mission", missionPanel.transform), 16,
-                    new Vector2(18f, -12f), new Vector2(684f, 58f));
+                SetTopLeft(missionPanel, new Vector2(24f, -188f), new Vector2(650f, 70f));
+                ConfigureText(FindUi("Mission", missionPanel.transform), 18,
+                    new Vector2(18f, -10f), new Vector2(614f, 50f));
             }
 
             var compactMission = FindUi("H5_MissionHud", root);
             if (compactMission != null)
             {
-                SetTopLeft(compactMission, new Vector2(24f, -300f), new Vector2(900f, 54f));
-                ConfigureText(compactMission, 15, new Vector2(12f, -8f), new Vector2(876f, 40f));
+                SetTopLeft(compactMission, new Vector2(24f, -270f), new Vector2(700f, 48f));
+                ConfigureText(compactMission, 16, new Vector2(12f, -6f), new Vector2(676f, 38f));
             }
         }
 
@@ -398,7 +571,7 @@ namespace Lumbre.Game.Editor
             boundsObject.transform.position = new Vector3(3.6f, 7.5f, 0f);
             var bounds = GetOrAdd<BoxCollider2D>(boundsObject);
             bounds.isTrigger = true;
-            bounds.size = new Vector2(40f, 23f);
+            bounds.size = new Vector2(40f, 24f);
             var confiner = GetOrAdd<CinemachineConfiner2D>(cameraObject);
             confiner.BoundingShape2D = bounds;
             confiner.Damping = 0.35f;
@@ -421,7 +594,7 @@ namespace Lumbre.Game.Editor
                 return;
             }
 
-            var targetWidth = 40f;
+            var targetWidth = BackdropWidth;
             var spriteWidth = Mathf.Max(0.01f, backdrop.sprite.bounds.size.x);
             var scale = targetWidth / spriteWidth;
             backdrop.transform.localScale = new Vector3(scale, scale, 1f);
@@ -479,7 +652,7 @@ namespace Lumbre.Game.Editor
                 Vector2.zero, position, size);
         }
 
-        private static void SetBottomRight(GameObject gameObject, Vector2 position, Vector2 size)
+        private static void SetTopRight(GameObject gameObject, Vector2 position, Vector2 size)
         {
             ConfigureRect(gameObject, Vector2.one, Vector2.one, Vector2.one, position, size);
         }

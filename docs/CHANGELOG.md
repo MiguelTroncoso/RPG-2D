@@ -1,5 +1,28 @@
 # Changelog técnico
 
+## 2026-07-21 — H9.2 corrección de layout Android — v0.8.1 Alpha
+
+### Incluido
+
+- Controles superiores reanclados dentro de la safe area; la matriz de resolución validada cubre 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720.
+- Backdrop ampliado uniformemente y volumen `H9_CameraBounds` ajustado para eliminar el hueco inferior sin estirar la escena ni cambiar gameplay.
+- HUD H7 resuelto durante `Awake`/`Start` y refrescado después de cargar o reanudar; se añadió una regresión PlayMode para el snapshot inicial.
+- Área táctil del joystick conservada en 228 px, con visual reducido a 168 px y handle de 96 px.
+- Paneles H7 compactados manteniendo legibilidad y prompts táctiles adaptados a `HABLAR CON NARA`/`EQUIPAR RECOMPENSA`, mientras teclado conserva sus teclas QA.
+- `H9VerticalSlicePolishBuilder.Validate` comprueba duplicados, viewport completo, safe area, obstáculos y spawns dentro del mundo.
+
+### Validación
+
+- EditMode: 23/23 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-2-editmode.xml`.
+- PlayMode: 11/11 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-2-playmode.xml`.
+- Build → Validate ejecutado dos veces en batchmode, ambas con código 0 y sin duplicaciones.
+- APK Android generado en `Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk`, 76,097,309 bytes, SHA-256 `a88d21b3d1a924569b59772654d8a46f79812ab7c005b4e6d30b2ca7abaefd6d`; permanece ignorado y no se sube.
+- La validación física Android continúa pendiente; no se presentan capturas de dispositivo ni métricas simuladas.
+
+### Límite explícito
+
+H9.2 modifica únicamente presentación, safe area, viewport, HUD, controles y validación de spawns. No cambia reglas de combate, IA, misión, progresión, inventario, persistencia, contratos de dominio, versión ni inicia H10.
+
 ## 2026-07-21 — H9.1 validación automatizada y cierre condicionado — v0.8.1 Alpha
 
 ### Incluido

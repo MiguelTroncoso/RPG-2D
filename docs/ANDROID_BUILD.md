@@ -136,3 +136,15 @@ PROJECT="/Users/migueltroncoso/Documents/Juego 2D"
 ```
 
 El resultado verificado en esta estación fue EditMode 23/23 y PlayMode 9/9. El APK H9 se generó en `/tmp/lumbre-h9-android.apk` con ARM64, OpenGLES3, Development Build, Allow Debugging y ConnectWithProfiler. El ADB incluido en Unity está en `PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb`; actualmente `adb devices -l` devuelve una lista vacía, así que H9.1 permanece bloqueado para instalación, arranques, capturas y métricas físicas.
+
+## H9.2 — Corrección de layout y APK de validación
+
+H9.2 mantiene landscape, ARM64, OpenGLES3, Development Build, Allow Debugging y ConnectWithProfiler. El builder conserva la configuración de Android y deja la salida intermedia en `/tmp/lumbre-h9-android.apk`; para revisión del hito se copia al destino ignorado del proyecto:
+
+```text
+Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk
+```
+
+El layout se valida en 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720. El joystick mantiene un área táctil amplia mientras su representación visual ocupa menos espacio; los controles superiores se anclan a la safe area y el HUD se resuelve después del arranque de la escena.
+
+El APK y cualquier carpeta `Builds/` quedan excluidos por `.gitignore`; no se suben al repositorio. Un APK generado correctamente no sustituye la prueba física: instalación, arranques, capturas y métricas Android siguen pendientes de un dispositivo conectado.

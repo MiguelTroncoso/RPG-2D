@@ -129,3 +129,9 @@ No disponibles. No se ejecutó la medición de diez minutos porque no hay hardwa
 ## Decisión final
 
 **BLOQUEADO.** H9.1 no se declara aprobado porque la prueba física obligatoria no pudo ejecutarse. El repositorio queda preparado para revisión técnica, sin iniciar H10 y manteniendo `v0.8.1 Alpha`.
+
+## Seguimiento H9.2 — corrección previa a la validación física
+
+H9.2 corrigió únicamente defectos de presentación identificados antes de volver al teléfono: safe area de controles superiores, franja inferior del viewport, inicialización del HUD, tamaño visual del joystick, densidad de paneles y prompts táctiles. También añadió validación automática de cámara, resoluciones, obstáculos y puntos de spawn.
+
+La corrección quedó verificada con EditMode 23/23 y PlayMode 11/11. La prueba física, las capturas reales y las métricas de hardware siguen pendientes; por tanto, este documento no cambia el estado de decisión de H9.1 ni autoriza el inicio de H10.

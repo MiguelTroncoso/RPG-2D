@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using Lumbre.Game.Client.Combat;
 using Lumbre.Game.Client.Missions;
@@ -52,16 +53,22 @@ namespace Lumbre.Game.Client.Presentation
 
         private void Awake()
         {
-            health ??= FindFirstObjectByType<H4CombatHealth>();
-            abilities ??= FindFirstObjectByType<H4BPlayerAbilityController>();
-            mission ??= FindFirstObjectByType<H5MissionRuntime>();
-            progression ??= FindFirstObjectByType<H6ProgressionRuntime>();
+            TryResolveReferences();
+        }
+
+        private void Start()
+        {
+            // Render the first snapshot as soon as all scene Awakes have completed.
+            // This avoids an empty HUD during bootstrap, save restore or resume.
+            RefreshNow();
         }
 
         private void Update()
         {
-            if (!IsConfigured)
+            if (!TryResolveReferences() || mission.Mission == null || mission.Inventory == null
+                || mission.Equipment == null)
             {
+                UpdatePulse();
                 return;
             }
 
@@ -74,6 +81,26 @@ namespace Lumbre.Game.Client.Presentation
 
             _refreshRemaining = 0.1f;
 
+            RefreshValues();
+
+            UpdatePulse();
+        }
+
+        public void RefreshNow()
+        {
+            if (!TryResolveReferences() || mission.Mission == null || mission.Inventory == null
+                || mission.Equipment == null)
+            {
+                return;
+            }
+
+            _refreshRemaining = 0.1f;
+            RefreshValues();
+            UpdatePulse();
+        }
+
+        private void RefreshValues()
+        {
             healthBar.value = health.MaxHealth <= 0 ? 0f : health.CurrentHealth / (float)health.MaxHealth;
             heatBar.value = abilities.MaxHeat <= 0 ? 0f : abilities.CurrentHeat / (float)abilities.MaxHeat;
             var experience = progression.Progression;
@@ -100,8 +127,33 @@ namespace Lumbre.Game.Client.Presentation
             progress.Append($"MORDELUZ  {snapshot.MordeluzDefeated}/{snapshot.MordeluzRequired}   •   ");
             progress.Append($"RESONANTE  {snapshot.ResonantDefeated}/{snapshot.ResonantRequired}");
             missionLabel.text = progress.ToString();
+        }
 
-            UpdatePulse();
+        private bool TryResolveReferences()
+        {
+            health ??= FindFirstObjectByType<H4CombatHealth>();
+            abilities ??= FindFirstObjectByType<H4BPlayerAbilityController>();
+            mission ??= FindFirstObjectByType<H5MissionRuntime>();
+            progression ??= FindFirstObjectByType<H6ProgressionRuntime>();
+            statusLabel ??= FindText("Status");
+            missionLabel ??= FindText("Mission");
+            healthBar ??= FindSlider("LifeBar");
+            heatBar ??= FindSlider("HeatBar");
+            experienceBar ??= FindSlider("ExperienceBar");
+            pulseTarget ??= GetComponent<RectTransform>();
+            return IsConfigured;
+        }
+
+        private Text FindText(string objectName)
+        {
+            return GetComponentsInChildren<Text>(true)
+                .FirstOrDefault(text => text.name == objectName);
+        }
+
+        private Slider FindSlider(string objectName)
+        {
+            return GetComponentsInChildren<Slider>(true)
+                .FirstOrDefault(slider => slider.name == objectName);
         }
 
         private void UpdatePulse()

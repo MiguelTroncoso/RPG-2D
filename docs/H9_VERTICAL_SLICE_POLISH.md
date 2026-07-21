@@ -8,7 +8,7 @@ H9 mejora la presentación de la demo v0.8.1 Alpha sin añadir mecánicas ni act
 
 - Cámara Cinemachine oficial con offset de composición, damping reducido, zoom de lectura y `CinemachineConfiner2D` sobre `H9_CameraBounds`.
 - Raíz `H9_SafeAreaRoot` para la UI completa de `PlayerUI`, con `CanvasScaler` 1920×1080 y adaptación a safe area.
-- Joystick de 228 px, handle de 120 px y botones móviles de 148 px con separación uniforme y color tint de selección.
+- Joystick con área táctil de 228 px, visual de 168 px, handle de 96 px y botones móviles de 148 px con separación uniforme y color tint de selección.
 - HUD de estado/misión compacto; `H5MissionHud` queda reservado para prompts contextuales de hablar/equipar.
 - Pausa y opciones reacomodadas para reducir desplazamiento vertical en resoluciones landscape.
 - `H9VerticalSlicePolishBuilder.Validate` comprueba cámara, safe area y escena.
@@ -27,6 +27,12 @@ H9 mejora la presentación de la demo v0.8.1 Alpha sin añadir mecánicas ni act
 La validación estructural de escena pasa en batchmode. El test dedicado es `H9VerticalSlicePolishPlayModeTests`. Para obtener XML no se usa `-quit` junto con `-runTests`; Unity termina al finalizar el Test Framework.
 
 H9.1 verificó dos ciclos Build → Validate con código 0, EditMode 23/23 y PlayMode 9/9. La regresión H9 detectó y corrigió el offset de cámara que `H3CinemachineFollowTarget` sobrescribía en runtime.
+
+## H9.2 — Corrección de layout Android
+
+H9.2 conserva el alcance de H9 y corrige únicamente defectos de presentación detectados al preparar la validación física: controles superiores dentro de la safe area, viewport completo sin franja negra inferior, snapshot inicial del HUD, joystick menos obstructivo, paneles H7 más densos y prompts táctiles sin teclas de teclado. La superficie táctil del joystick no se reduce.
+
+El builder valida la escena en 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720, además de comprobar que la cámara ocupa el viewport completo y que el respawn y los spawns de combate quedan dentro de `H9_CameraBounds` y fuera de obstáculos. La validación física en Android sigue siendo obligatoria y pendiente.
 
 ## Android
 

@@ -2,7 +2,7 @@
 
 Documento de orientación inicial para un MMORPG 2D isométrico, original y orientado primero a Android.
 
-> Estado: v0.8.1 Alpha · H9.1 — regresiones automatizadas y APK verificadas; validación física Android bloqueada por falta de dispositivo. H0–H8.1 estables.
+> Estado: v0.8.1 Alpha · H9.2 — correcciones automatizadas de layout Android; validación física pendiente. H0–H8.1 estables.
 
 ## Resumen
 
@@ -35,7 +35,7 @@ La propuesta no intenta ganar por tamaño desde el primer día. El objetivo inic
 - [Architecture](docs/ARCHITECTURE.md): módulos, dependencias y frontera offline/online.
 - [Android build](docs/ANDROID_BUILD.md): configuración horizontal y procedimiento de build.
 - [Testing](docs/TESTING.md): estrategia y comandos de verificación.
-- [Changelog](docs/CHANGELOG.md): bitácora reproducible de H1–H9.1.
+- [Changelog](docs/CHANGELOG.md): bitácora reproducible de H1–H9.2.
 - [H2 greybox](docs/H2_GREYBOX.md): zonas, grid, colisiones, navegación y presupuesto estructural.
 - [H3 player control](docs/H3_PLAYER_CONTROL.md): Layers, Gizmos, input, movimiento, cámara, colisiones y respawn.
 - [H4 combat prototype](docs/H4_COMBAT_PROTOTYPE.md): Mordeluz, salud, daño, cooldown, IA, muerte y feedback.
@@ -47,6 +47,7 @@ La propuesta no intenta ganar por tamaño desde el primer día. El objetivo inic
 - [H8.1 Android black screen](docs/H8_1_ANDROID_BLACK_SCREEN.md): diagnóstico, corrección de Bootstrap y checklist físico pendiente.
 - [H9 vertical slice polish](docs/H9_VERTICAL_SLICE_POLISH.md): cámara, safe area, controles, HUD, menús y validación Android.
 - [H9.1 physical validation](docs/H9_1_PHYSICAL_VALIDATION.md): regresiones, builder, APK y estado de la validación física.
+- [H9.2 Android layout fix](docs/H9_2_ANDROID_LAYOUT_FIX.md): correcciones de safe area, viewport, HUD, joystick y prompts táctiles.
 
 ## Qué no se implementa todavía
 
@@ -54,4 +55,4 @@ H9 conserva la optimización de presentación y pule exclusivamente la experienc
 
 ## Próximo paso propuesto
 
-La siguiente acción es conectar un Android de referencia para cerrar la validación física y luego realizar la revisión técnica del repositorio. El objetivo de versión posterior es v0.9.0 Alpha; no se inicia H10 ni se añaden sistemas nuevos antes de esa revisión.
+La siguiente acción es conectar un Android de referencia para validar físicamente H9.1/H9.2 y luego realizar la revisión técnica del repositorio. El objetivo de versión posterior es v0.9.0 Alpha; no se inicia H10 ni se añaden sistemas nuevos antes de esa revisión.

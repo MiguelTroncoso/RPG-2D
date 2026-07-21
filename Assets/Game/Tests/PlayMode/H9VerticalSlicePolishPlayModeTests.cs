@@ -68,9 +68,79 @@ namespace Lumbre.Game.Tests
                     Is.GreaterThanOrEqualTo(140f));
                 Assert.That(defense.GetComponent<RectTransform>().sizeDelta.x,
                     Is.GreaterThanOrEqualTo(140f));
+                Assert.That(attack.GetComponent<RectTransform>().anchoredPosition.y, Is.LessThan(0f));
+                Assert.That(defense.GetComponent<RectTransform>().anchoredPosition.y, Is.LessThan(0f));
                 Assert.That(Mathf.Abs(attack.GetComponent<RectTransform>().anchoredPosition.x
                     - defense.GetComponent<RectTransform>().anchoredPosition.x), Is.GreaterThan(120f));
                 Assert.That(H8PauseController.VersionLabel, Is.EqualTo("v0.8.1 Alpha"));
+            }
+            finally
+            {
+                Time.timeScale = 1f;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator HudRendersInitialSnapshotAfterSceneStartup()
+        {
+            SceneManager.LoadScene("VerticalSlice", LoadSceneMode.Single);
+            yield return null;
+            yield return null;
+
+            var status = GameObject.Find("Status")?.GetComponent<Text>();
+            var mission = GameObject.Find("Mission")?.GetComponent<Text>();
+            try
+            {
+                Assert.IsNotNull(status);
+                Assert.IsNotNull(mission);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(status.text));
+                Assert.IsFalse(string.IsNullOrWhiteSpace(mission.text));
+                StringAssert.Contains("VIDA", status.text);
+                StringAssert.Contains("NARA VELAQUIETA", mission.text);
+            }
+            finally
+            {
+                Time.timeScale = 1f;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ControlsKeepTouchAreaCameraViewportAndSpawnsInsideWorld()
+        {
+            SceneManager.LoadScene("VerticalSlice", LoadSceneMode.Single);
+            yield return null;
+            yield return new WaitForFixedUpdate();
+
+            var root = GameObject.Find("H9_SafeAreaRoot")?.transform;
+            var joystick = GameObject.Find("VirtualJoystick_Base")?.GetComponent<RectTransform>();
+            var joystickVisual = GameObject.Find("VirtualJoystick_Visual")?.GetComponent<RectTransform>();
+            var camera = GameObject.Find("Main Camera")?.GetComponent<Camera>();
+            var bounds = GameObject.Find("H9_CameraBounds")?.GetComponent<Collider2D>();
+            var spawnNames = new[]
+            {
+                "Player_RespawnPoint", "Mordeluz_1_SpawnPoint", "Mordeluz_2_SpawnPoint",
+                "Mordeluz_3_SpawnPoint", "Mordeluz_Resonante_SpawnPoint"
+            };
+
+            try
+            {
+                Assert.IsNotNull(root);
+                Assert.IsNotNull(joystick);
+                Assert.IsNotNull(joystickVisual);
+                Assert.That(joystick.sizeDelta, Is.EqualTo(new Vector2(228f, 228f)));
+                Assert.That(joystickVisual.sizeDelta, Is.EqualTo(new Vector2(168f, 168f)));
+                Assert.That(camera.rect, Is.EqualTo(new Rect(0f, 0f, 1f, 1f)));
+                Assert.IsNotNull(bounds);
+
+                foreach (var spawnName in spawnNames)
+                {
+                    var spawn = GameObject.Find(spawnName);
+                    Assert.IsNotNull(spawn, spawnName);
+                    var point = spawn.transform.position;
+                    var worldBounds = bounds.bounds;
+                    Assert.IsTrue(point.x >= worldBounds.min.x && point.x <= worldBounds.max.x
+                        && point.y >= worldBounds.min.y && point.y <= worldBounds.max.y, spawnName);
+                }
             }
             finally
             {

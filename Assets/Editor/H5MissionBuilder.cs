@@ -225,7 +225,7 @@ namespace Lumbre.Game.Editor
             label.raycastTarget = false;
 
             var hud = GetOrAdd<H5MissionHud>(hudObject);
-            hud.Configure(runtime, nara, player, label);
+            hud.Configure(runtime, nara, player, label, player.GetComponent<H3PlayerInputReader>());
         }
 
         private static GameObject FindOrCreate(string name)

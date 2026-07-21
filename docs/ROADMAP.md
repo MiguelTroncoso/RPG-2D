@@ -1,6 +1,6 @@
 # Lumbre de Nácar — Roadmap por hitos verificables
 
-> Versión: 1.6 · Estado: H9.1 — regresiones automatizadas y APK verificadas; validación física Android bloqueada · Fecha: 2026-07-21
+> Versión: 1.7 · Estado: H9.2 — correcciones automatizadas de layout Android; validación física pendiente · Fecha: 2026-07-21
 
 Este roadmap separa la primera demo de la producción online. Cada hito tiene un resultado pequeño y un criterio de salida. H0 y el vertical slice reducido están aprobados; H1 está autorizado con Unity 6.3 LTS, Input System multiplataforma y Cinemachine.
 
@@ -25,7 +25,8 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 | H8.1 — Arranque Android | Diagnóstico y corrección de pantalla negra; APK debug y checklist físico | Alta | H8 |
 | H9 — Vertical Slice Polish | Cámara, UX móvil, HUD, menús y preparación Android | Media | H8.1 |
 | H9.1 — Validación física y regresiones | Tests completos, APK, dispositivo Android, capturas y métricas | Alta | H9 |
-| H10 — Demo candidata | Corrección de bugs y prueba con persona externa | Media | H9.1 |
+| H9.2 — Corrección de layout Android | Safe area, viewport, HUD, joystick, prompts y spawns | Media | H9.1 |
+| H10 — Demo candidata | Corrección de bugs y prueba con persona externa | Media | H9.2 |
 
 ### H0 — Aprobación de alcance
 
@@ -128,6 +129,14 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 **Criterio de salida:** todas las suites pasan, el APK instala y arranca en un teléfono físico, la UI respeta safe area, no hay zonas negras graves, los controles son utilizables y se registran capturas/métricas reales.
 
 **Resultado:** BLOQUEADO. Las suites completas pasan 23/23 y 9/9; el builder es idempotente y el APK se genera. `adb devices -l` no muestra ningún dispositivo, por lo que no existen resultados físicos, capturas reales, logcat ni métricas preliminares. Se corrigió únicamente el offset de composición de cámara que el runtime sobrescribía.
+
+### H9.2 — Corrección de layout Android
+
+**Entregables:** controles superiores dentro de safe area, viewport completo sin franja inferior, HUD inicializado de forma determinista, joystick visual reducido sin perder área táctil, paneles compactos, prompts táctiles y validación de spawns.
+
+**Criterio de salida:** Build/Validate es idempotente; la matriz 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720 conserva cámara y UI dentro de los límites; EditMode y PlayMode pasan; el APK ARM64/OpenGLES3 compila. La aceptación física sigue dependiendo de un Android conectado.
+
+**Resultado:** correcciones implementadas y verificadas automáticamente con dos ciclos Build → Validate, EditMode 23/23, PlayMode 11/11 y APK ARM64/OpenGLES3 generado en `Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk`. La validación física final sigue pendiente; no se cambia gameplay, versión ni se inicia H10.
 
 ### H10 — Demo candidata
 

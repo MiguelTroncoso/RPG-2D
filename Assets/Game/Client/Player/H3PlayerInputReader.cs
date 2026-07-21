@@ -1,3 +1,4 @@
+using System;
 using Lumbre.Game.Domain.Movement;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -28,6 +29,36 @@ namespace Lumbre.Game.Client.Player
         {
             get => actionsAsset;
             set => actionsAsset = value;
+        }
+
+        /// <summary>
+        /// Uses the existing Touch control scheme for presentation hints on mobile.
+        /// Input still comes from the same action map and bindings as before.
+        /// </summary>
+        public bool IsTouchControlSchemeActive
+        {
+            get
+            {
+                if (!UnityEngine.Application.isMobilePlatform)
+                {
+                    return false;
+                }
+
+                if (actionsAsset == null)
+                {
+                    return true;
+                }
+
+                foreach (var scheme in actionsAsset.controlSchemes)
+                {
+                    if (string.Equals(scheme.name, "Touch", StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         private void Awake()

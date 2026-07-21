@@ -1,6 +1,6 @@
 # Lumbre de Nácar — Roadmap por hitos verificables
 
-> Versión: 1.7 · Estado: H9.2 — correcciones automatizadas de layout Android; validación física pendiente · Fecha: 2026-07-21
+> Versión: 1.8 · Estado: H9 — APROBADO CON OBSERVACIONES; evidencia física manual incorporada · Fecha: 2026-07-21
 
 Este roadmap separa la primera demo de la producción online. Cada hito tiene un resultado pequeño y un criterio de salida. H0 y el vertical slice reducido están aprobados; H1 está autorizado con Unity 6.3 LTS, Input System multiplataforma y Cinemachine.
 
@@ -120,7 +120,7 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 
 **Criterio de salida:** el slice conserva las reglas H3–H8, el avatar completa el recorrido sin zonas negras, la UI respeta safe area en relaciones horizontales objetivo, cámara/controles/HUD/menús pasan sus pruebas y el APK Android compila. La aceptación física de FPS, memoria, temperatura y batería requiere hardware conectado; no se declara cerrada sin esa evidencia.
 
-**Resultado:** pulido de presentación implementado en v0.8.1 Alpha. El builder y `Validate` pasaron dos ejecuciones cada uno; EditMode pasó 23/23 y PlayMode 9/9. El APK ARM64/OpenGLES3 se generó correctamente. La captura y métricas físicas siguen pendientes de un dispositivo ADB; no se inicia H10.
+**Resultado:** pulido de presentación implementado en v0.8.1 Alpha. El builder y `Validate` pasaron dos ejecuciones cada uno; EditMode pasó 23/23 y PlayMode 9/9. El APK ARM64/OpenGLES3 se generó correctamente y posteriormente fue instalado manualmente para la validación física documental.
 
 ### H9.1 — Validación física, regresiones y cierre condicionado
 
@@ -128,15 +128,15 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 
 **Criterio de salida:** todas las suites pasan, el APK instala y arranca en un teléfono físico, la UI respeta safe area, no hay zonas negras graves, los controles son utilizables y se registran capturas/métricas reales.
 
-**Resultado:** BLOQUEADO. Las suites completas pasan 23/23 y 9/9; el builder es idempotente y el APK se genera. `adb devices -l` no muestra ningún dispositivo, por lo que no existen resultados físicos, capturas reales, logcat ni métricas preliminares. Se corrigió únicamente el offset de composición de cámara que el runtime sobrescribía.
+**Resultado histórico:** inicialmente BLOQUEADO por falta de dispositivo ADB. El estado se actualiza con la evidencia manual incorporada en H9.2; el perfilado ADB, logcat y Unity Profiler permanece pendiente.
 
 ### H9.2 — Corrección de layout Android
 
 **Entregables:** controles superiores dentro de safe area, viewport completo sin franja inferior, HUD inicializado de forma determinista, joystick visual reducido sin perder área táctil, paneles compactos, prompts táctiles y validación de spawns.
 
-**Criterio de salida:** Build/Validate es idempotente; la matriz 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720 conserva cámara y UI dentro de los límites; EditMode y PlayMode pasan; el APK ARM64/OpenGLES3 compila. La aceptación física sigue dependiendo de un Android conectado.
+**Criterio de salida:** Build/Validate es idempotente; la matriz 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720 conserva cámara y UI dentro de los límites; EditMode y PlayMode pasan; el APK ARM64/OpenGLES3 compila; la validación visual física queda documentada.
 
-**Resultado:** correcciones implementadas y verificadas automáticamente con dos ciclos Build → Validate, EditMode 23/23, PlayMode 11/11 y APK ARM64/OpenGLES3 generado en `Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk`. La validación física final sigue pendiente; no se cambia gameplay, versión ni se inicia H10.
+**Resultado:** correcciones implementadas y verificadas automáticamente con dos ciclos Build → Validate, EditMode 23/23, PlayMode 11/11 y APK ARM64/OpenGLES3 generado en `Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk`. El APK fue instalado manualmente y seis capturas físicas confirman safe area, HUD, cámara y controles. H9 queda **APROBADO CON OBSERVACIONES**; ADB, logcat y Unity Profiler siguen pendientes. No se cambia gameplay, versión ni se inicia H10.
 
 ### H10 — Demo candidata
 

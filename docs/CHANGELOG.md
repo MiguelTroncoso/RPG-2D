@@ -17,7 +17,13 @@
 - PlayMode: 11/11 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-2-playmode.xml`.
 - Build → Validate ejecutado dos veces en batchmode, ambas con código 0 y sin duplicaciones.
 - APK Android generado en `Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk`, 76,097,309 bytes, SHA-256 `a88d21b3d1a924569b59772654d8a46f79812ab7c005b4e6d30b2ca7abaefd6d`; permanece ignorado y no se sube.
-- La validación física Android continúa pendiente; no se presentan capturas de dispositivo ni métricas simuladas.
+- APK instalado manualmente en un teléfono Android y seis capturas físicas incorporadas en `docs/captures/android-h9.2-physical/`.
+- La evidencia visual confirma safe area, HUD, cámara y controles táctiles.
+- ADB, logcat y Unity Profiler continúan pendientes; no se presentan métricas de rendimiento inferidas.
+
+### Cierre H9
+
+**APROBADO CON OBSERVACIONES:** H9 queda cerrado documentalmente con evidencia física manual. H10 no se inicia y se mantiene `v0.8.1 Alpha`.
 
 ### Límite explícito
 
@@ -39,9 +45,9 @@ H9.2 modifica únicamente presentación, safe area, viewport, HUD, controles y v
 - APK Android generado correctamente: `/tmp/lumbre-h9-android.apk`, ARM64/OpenGLES3, Development/Debug/Profiler, 1,023,031,188 bytes.
 - `adb devices -l` no detectó dispositivos; no se ejecutaron instalación, arranques, capturas físicas ni métricas de hardware.
 
-### Estado H9.1
+### Estado H9.1 (histórico)
 
-**BLOQUEADO:** la evidencia automatizada y el APK están verificados, pero la puerta de aceptación física exige un Android conectado. No se inicia H10 ni se cambia la versión.
+**INICIALMENTE BLOQUEADO:** la evidencia automatizada y el APK estaban verificados, pero faltaba evidencia física. El bloqueo queda resuelto documentalmente por H9.2 con instalación manual y capturas físicas; el perfilado ADB/logcat/Profiler continúa pendiente.
 
 ## 2026-07-21 — H9 pulido del vertical slice para Android — v0.8.1 Alpha
 

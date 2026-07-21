@@ -2,9 +2,9 @@
 
 ## Estado
 
-**Implementado y verificado automáticamente; validación física pendiente.**
+**APROBADO CON OBSERVACIONES.**
 
-H9.2 corrige únicamente defectos de presentación identificados durante la preparación de la validación física de H9.1. Mantiene `v0.8.1 Alpha`, los contratos H3–H8 y la decisión de no iniciar H10.
+H9.2 corrige únicamente defectos de presentación identificados durante la preparación de la validación física de H9.1. La validación visual física fue completada manualmente con el APK instalado en un teléfono Android. Mantiene `v0.8.1 Alpha`, los contratos H3–H8 y la decisión de no iniciar H10.
 
 ## Base y entorno
 
@@ -13,7 +13,7 @@ H9.2 corrige únicamente defectos de presentación identificados durante la prep
 - Unity: `6000.3.20f1`
 - Plataforma objetivo: Android landscape, ARM64, OpenGLES3
 - Build: Development, Allow Debugging y ConnectWithProfiler
-- Dispositivo físico: pendiente; no se simula evidencia de teléfono
+- Dispositivo físico: validación manual completada; fabricante, modelo y versión Android no quedaron registrados en el material entregado
 
 ## Causas y correcciones
 
@@ -92,10 +92,12 @@ Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk
 
 Resultado generado: 76,097,309 bytes, fecha `2026-07-21 19:12:51 -0400`, SHA-256 `a88d21b3d1a924569b59772654d8a46f79812ab7c005b4e6d30b2ca7abaefd6d`. La carpeta `Builds/` y el APK están ignorados y no forman parte del commit. El APK solo demuestra empaquetado; no sustituye la instalación y prueba en un teléfono real.
 
-## Evidencia física y riesgos pendientes
+## Evidencia física y observaciones
 
-No se agregan capturas de Android porque el dispositivo no está disponible en esta estación. Quedan pendientes instalación limpia, arranques, safe area real, notch/barra de navegación, controles táctiles, menú, logcat, FPS, memoria, GC, draw calls, temperatura y batería.
+El APK fue instalado manualmente y se incorporaron seis capturas físicas en [`docs/captures/android-h9.2-physical/`](captures/android-h9.2-physical/). La evidencia confirma visualmente la safe area, el HUD, el encuadre de cámara y los controles táctiles durante el recorrido plaza–sendero–cueva y el combate.
+
+Queda pendiente el perfilado mediante ADB, logcat y Unity Profiler, junto con sus métricas de FPS, frame time, memoria, GC, draw calls, temperatura y batería. Estas observaciones no bloquean el cierre documental visual de H9, pero deben resolverse antes de usar el resultado como benchmark Android.
 
 ## Decisión
 
-H9.2 queda listo para validación física de H9.1. No se cambian versiones, reglas de juego, escenas fuera de la composición de presentación, contratos de dominio ni roadmap de H10.
+H9 queda **APROBADO CON OBSERVACIONES**: la evidencia física manual confirma la presentación objetivo y el APK fue instalado manualmente. El perfilado ADB/logcat/Profiler permanece pendiente. No se cambian versiones, reglas de juego, escenas fuera de la composición de presentación, contratos de dominio ni se inicia H10.

@@ -2,9 +2,9 @@
 
 ## Estado de decisión
 
-**BLOQUEADO**
+**APROBADO CON OBSERVACIONES**
 
-La validación automatizada, el builder H9 y el APK Android están verificados. La aceptación física no puede cerrarse en esta estación porque no hay un teléfono Android conectado a ADB.
+La validación automatizada, el builder H9, el APK Android y la evidencia visual de una validación física manual están verificados. El APK fue instalado manualmente y las capturas confirman safe area, HUD, cámara y controles táctiles. El perfilado mediante ADB, logcat y Unity Profiler sigue pendiente.
 
 ## Identificación
 
@@ -22,12 +22,12 @@ La validación automatizada, el builder H9 y el APK Android están verificados. 
 - SDK Android/NDK/OpenJDK: instalados dentro de Unity
 - ADB: `/Applications/Unity/Hub/Editor/6000.3.20f1/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb`
 - Fecha de ejecución: `2026-07-21`
-- Dispositivo: no disponible
+- Dispositivo: teléfono Android validado manualmente; modelo no registrado en el material entregado
 - Fabricante/modelo: no disponible
 - Versión Android: no disponible
-- Resolución y aspect ratio: no disponible
+- Resolución y aspect ratio del dispositivo: no disponible; las capturas entregadas son JPEG de 1356×610
 - RAM: no disponible
-- Orientación física: no disponible
+- Orientación física: landscape
 
 ## Pruebas automáticas
 
@@ -75,31 +75,25 @@ La escena mantiene una única `H9_SafeAreaRoot`, un `H9_CameraBounds`, un `Cinem
 - Tamaño: 1,023,031,188 bytes, aproximadamente 73 MB
 - APK: no versionado en GitHub
 
-## Validación física
+## Validación física manual
 
-No se pudo ejecutar:
+Se completó una validación manual con el APK instalado directamente en un teléfono Android. Las capturas muestran el recorrido plaza–sendero–cueva, HUD, cámara, joystick, controles ATK/DEF/AOE y una situación de combate.
 
-- desinstalación e instalación limpia;
-- primer y segundo arranque;
-- arranque con save;
-- minimizar/restaurar;
-- force close y reapertura;
-- pausa, opciones, sliders y toggles;
-- joystick, ATK, DEF y AOE;
-- interacción con Nara y equipamiento;
-- recorrido plaza–sendero–cueva;
-- combate en hardware;
-- captura de logcat;
-- capturas reales;
-- medición de FPS, frame time, memoria, GC, draw calls, temperatura y batería.
+La evidencia visual confirma:
 
-`adb devices -l` devuelve una lista vacía. No se presentan renders del Editor como evidencia física.
+- safe area y controles dentro del área visible;
+- HUD de vida, Calor, inventario, misión y experiencia sin recortes visibles;
+- encuadre de cámara durante el recorrido;
+- joystick y botones táctiles visibles y utilizables en las escenas capturadas.
+
+No se afirma evidencia de rendimiento: la captura de logcat, el perfilado por ADB y Unity Profiler, FPS, frame time, memoria, GC, draw calls, temperatura y batería siguen pendientes.
 
 ## Capturas
 
-- Física Android: ninguna; bloqueada por falta de dispositivo.
+- Física Android: [`android-h9.2-physical/`](captures/android-h9.2-physical/), seis capturas manuales.
+- Índice de capturas: [`docs/captures/README.md`](captures/README.md).
 - Render de referencia: [`h9-android-layout-preview.png`](captures/h9-android-layout-preview.png). No representa hardware físico.
-- Carpeta reservada para evidencia real: [`docs/captures/android-h9/`](captures/android-h9/).
+- Las capturas físicas no contienen notificaciones, correos, números de teléfono ni identificadores personales.
 
 ## Bug encontrado y corrección
 
@@ -113,25 +107,21 @@ Corrección permitida y aplicada:
 
 ## Métricas preliminares
 
-No disponibles. No se ejecutó la medición de diez minutos porque no hay hardware conectado. No se extrapolan métricas del Editor ni del APK como benchmark Android.
+No disponibles. El perfilado mediante ADB, logcat y Unity Profiler queda como observación pendiente. No se extrapolan métricas del Editor ni de las capturas como benchmark Android.
 
 ## Riesgos pendientes
 
-- Arranque real Bootstrap → VerticalSlice en teléfono.
-- Safe Area en la relación de aspecto del dispositivo objetivo.
-- Zonas negras y encuadre bajo notch o barra de navegación.
-- Ergonomía y visibilidad de joystick, ATK, DEF, AOE, HABLAR y EQUIP.
-- Menú de opciones, sliders, toggles y FPS/debug en hardware.
-- Estabilidad durante cinco arranques y minimización.
+- Registro del fabricante, modelo, versión Android y RAM del dispositivo.
+- Perfilado por ADB, logcat y Unity Profiler.
 - FPS, frame time, memoria, GC, draw calls, temperatura y batería.
-- Logcat de errores Android.
+- Validación instrumentada de arranques, minimización, menú de opciones y FPS/debug.
 
 ## Decisión final
 
-**BLOQUEADO.** H9.1 no se declara aprobado porque la prueba física obligatoria no pudo ejecutarse. El repositorio queda preparado para revisión técnica, sin iniciar H10 y manteniendo `v0.8.1 Alpha`.
+**APROBADO CON OBSERVACIONES.** La evidencia física manual y las capturas confirman la presentación objetivo de H9. El perfilado por ADB, logcat y Unity Profiler queda pendiente. H10 no se inicia y se mantiene `v0.8.1 Alpha`.
 
 ## Seguimiento H9.2 — corrección previa a la validación física
 
 H9.2 corrigió únicamente defectos de presentación identificados antes de volver al teléfono: safe area de controles superiores, franja inferior del viewport, inicialización del HUD, tamaño visual del joystick, densidad de paneles y prompts táctiles. También añadió validación automática de cámara, resoluciones, obstáculos y puntos de spawn.
 
-La corrección quedó verificada con EditMode 23/23 y PlayMode 11/11. La prueba física, las capturas reales y las métricas de hardware siguen pendientes; por tanto, este documento no cambia el estado de decisión de H9.1 ni autoriza el inicio de H10.
+La corrección quedó verificada con EditMode 23/23, PlayMode 11/11 y seis capturas físicas manuales con APK instalado. La evidencia visual cierra H9 como **APROBADO CON OBSERVACIONES**; ADB, logcat y Profiler siguen pendientes y H10 no se inicia.

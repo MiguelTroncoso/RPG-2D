@@ -7,7 +7,7 @@ namespace Lumbre.Game.Client.Bootstrap
 {
     public sealed class BootstrapSceneLoader : MonoBehaviour
     {
-        public const string DiagnosticVersion = "v0.8.0 Alpha-debug";
+        public const string DiagnosticVersion = "v0.8.1 Alpha-debug";
 
         private bool _loadStarted;
 

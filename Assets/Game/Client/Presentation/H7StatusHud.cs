@@ -79,10 +79,10 @@ namespace Lumbre.Game.Client.Presentation
             var experience = progression.Progression;
             experienceBar.value = experience == null ? 0f : experience.Snapshot.NormalizedProgress;
 
-            statusLabel.text = $"BASTIÓN DE BRASA\nVIDA {health.CurrentHealth}/{health.MaxHealth}   "
+            statusLabel.text = $"BASTIÓN  ·  VIDA {health.CurrentHealth}/{health.MaxHealth}  ·  "
                 + $"CALOR {abilities.CurrentHeat}/{abilities.MaxHeat}\n"
-                + $"NIVEL {experience?.Snapshot.Level ?? 1}   "
-                + $"INVENTARIO {mission.Inventory.Count}/{mission.Inventory.Capacity}   "
+                + $"NIVEL {experience?.Snapshot.Level ?? 1}  ·  "
+                + $"INVENTARIO {mission.Inventory.Count}/{mission.Inventory.Capacity}  ·  "
                 + $"RELIQUIA {(mission.Equipment.EquippedItem.HasValue ? "EQUIPADA" : "VACÍA")}";
 
             var snapshot = mission.Mission.Snapshot;

@@ -6,7 +6,7 @@ namespace Lumbre.Game.Client.Presentation
 {
     public sealed class H8PauseController : MonoBehaviour
     {
-        public const string VersionLabel = "v0.8.0 Alpha";
+        public const string VersionLabel = "v0.8.1 Alpha";
 
         [SerializeField] private CanvasGroup pausePanel;
         [SerializeField] private CanvasGroup optionsPanel;

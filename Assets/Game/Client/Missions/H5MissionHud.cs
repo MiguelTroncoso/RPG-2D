@@ -1,4 +1,3 @@
-using System.Text;
 using Lumbre.Game.Domain.Missions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -37,52 +36,28 @@ namespace Lumbre.Game.Client.Missions
             }
 
             var snapshot = runtime.Mission.Snapshot;
-            var text = new StringBuilder();
-            text.Append("NARA VELAQUIETA  |  ");
-            text.Append(snapshot.State switch
+            var text = snapshot.State switch
             {
                 MissionState.Available => "MISIÓN DISPONIBLE",
                 MissionState.Active => "MISIÓN ACTIVA",
                 MissionState.ReadyToTurnIn => "REGRESA CON NARA",
                 MissionState.Completed => "MISIÓN COMPLETADA",
                 _ => "MISIÓN"
-            });
-            text.Append('\n');
-            text.Append($"Mordeluz {snapshot.MordeluzDefeated}/{snapshot.MordeluzRequired}  |  ");
-            text.Append($"Resonante {snapshot.ResonantDefeated}/{snapshot.ResonantRequired}");
-            text.Append('\n');
-            text.Append("Inventario ");
-            text.Append(runtime.Inventory.Count);
-            text.Append('/');
-            text.Append(runtime.Inventory.Capacity);
-            text.Append(": ");
-            for (var index = 0; index < runtime.Inventory.Capacity; index++)
-            {
-                var item = runtime.Inventory.GetAt(index);
-                text.Append(item.HasValue ? $"[{index + 1}] {item.Value.DisplayName}" : "[—]");
-                if (index < runtime.Inventory.Capacity - 1)
-                {
-                    text.Append("  ");
-                }
-            }
+            };
 
-            text.Append('\n');
-            text.Append("Ranura reliquia: ");
-            text.Append(runtime.Equipment.EquippedItem.HasValue
-                ? runtime.Equipment.EquippedItem.Value.DisplayName
-                : "vacía");
+            var prompt = string.Empty;
             if (nara != null && player != null && nara.IsInRange(player))
             {
-                text.Append("  |  F/HABLAR");
+                prompt = "  ·  F / HABLAR CON NARA";
             }
 
             if (runtime.Inventory.Contains(H5MissionModel.RewardItemId)
                 && !runtime.Equipment.EquippedItem.HasValue)
             {
-                text.Append("  |  G/EQUIPAR");
+                prompt += "  ·  G / EQUIPAR RECOMPENSA";
             }
 
-            label.text = text.ToString();
+            label.text = prompt.Length == 0 ? string.Empty : text + prompt;
         }
     }
 }

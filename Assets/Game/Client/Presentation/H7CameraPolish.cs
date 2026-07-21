@@ -10,6 +10,8 @@ namespace Lumbre.Game.Client.Presentation
         [SerializeField] private CinemachineFollow follow;
         [SerializeField, Min(0.01f)] private float shakeDuration = 0.12f;
         [SerializeField, Min(0.01f)] private float baseZoom = 9f;
+        [SerializeField, Min(0.01f)] private float followDamping = 0.35f;
+        [SerializeField] private Vector3 compositionOffset = new Vector3(0f, 0.65f, -20f);
 
         private Vector3 _baseOffset;
         private float _shakeRemaining;
@@ -18,8 +20,12 @@ namespace Lumbre.Game.Client.Presentation
         private float _zoomProgress;
 
         public bool IsConfigured => cmCamera != null && follow != null;
+        public bool IsPolished => IsConfigured && Mathf.Abs(baseZoom - 8.2f) < 0.05f
+            && follow.FollowOffset.y > 0.1f && followDamping <= 0.5f;
         public bool IsShaking => _shakeRemaining > 0f;
         public bool IsZooming => _zoomRemaining > 0f;
+        public Vector3 FollowOffset => follow == null ? Vector3.zero : follow.FollowOffset;
+        public float OrthographicSize => cmCamera == null ? 0f : cmCamera.Lens.OrthographicSize;
 
         public void Configure(CinemachineCamera targetCamera, CinemachineFollow targetFollow)
         {
@@ -29,6 +35,24 @@ namespace Lumbre.Game.Client.Presentation
             {
                 _baseOffset = follow.FollowOffset;
             }
+        }
+
+        public void ConfigureH9(float zoom, Vector3 offset, Vector3 damping)
+        {
+            if (cmCamera == null || follow == null)
+            {
+                return;
+            }
+
+            baseZoom = Mathf.Max(0.01f, zoom);
+            compositionOffset = offset;
+            followDamping = Mathf.Max(0.01f, damping.x);
+            _baseOffset = offset;
+            follow.FollowOffset = offset;
+            follow.TrackerSettings.PositionDamping = damping;
+            var lens = cmCamera.Lens;
+            lens.OrthographicSize = baseZoom;
+            cmCamera.Lens = lens;
         }
 
         private void Awake()
@@ -43,6 +67,12 @@ namespace Lumbre.Game.Client.Presentation
             if (cmCamera != null)
             {
                 baseZoom = cmCamera.Lens.OrthographicSize;
+            }
+
+            if (follow != null)
+            {
+                compositionOffset = follow.FollowOffset;
+                followDamping = follow.TrackerSettings.PositionDamping.x;
             }
         }
 

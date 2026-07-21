@@ -1,6 +1,6 @@
 # Lumbre de Nácar — Roadmap por hitos verificables
 
-> Versión: 1.4 · Estado: H8.1 corregido; validación física pendiente · Fecha: 2026-07-20
+> Versión: 1.5 · Estado: H9 — pulido de presentación completado; validación física Android pendiente · Fecha: 2026-07-21
 
 Este roadmap separa la primera demo de la producción online. Cada hito tiene un resultado pequeño y un criterio de salida. H0 y el vertical slice reducido están aprobados; H1 está autorizado con Unity 6.3 LTS, Input System multiplataforma y Cinemachine.
 
@@ -23,7 +23,7 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 | H7 — Arte base y pulido | Arte original base, animaciones, VFX, audio, HUD y cámara | Media | H6 |
 | H8 — Optimización, UX y preparación | Pausa, opciones, configuración local, HUD refinado y perfilado QA | Media | H7 |
 | H8.1 — Arranque Android | Diagnóstico y corrección de pantalla negra; APK debug y checklist físico | Alta | H8 |
-| H9 — Perfilado Android | FPS, memoria, temperatura y batería medidos | Alta | H8.1 |
+| H9 — Vertical Slice Polish | Cámara, UX móvil, HUD, menús y preparación Android | Media | H8.1 |
 | H10 — Demo candidata | Corrección de bugs y prueba con persona externa | Media | H9 |
 
 ### H0 — Aprobación de alcance
@@ -110,13 +110,15 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 
 **Criterio de salida:** el APK debe mostrar VerticalSlice, jugador, cámara, HUD y controles después del splash en cinco arranques físicos: instalación limpia, segundo arranque, con save, después de minimizar y después de forzar cierre. La corrección no debe introducir gameplay nuevo.
 
-**Resultado parcial:** la causa raíz quedó confirmada y corregida: Bootstrap era la escena 0 sin ningún cargador runtime. Builder, EditMode 23/23, PlayMode 8/8 y el APK `/tmp/lumbre-h8-1-black-screen-debug.apk` están verificados. No hay dispositivo ADB conectado, por lo que la instalación, logcat y los cinco arranques físicos siguen pendientes. H9 permanece bloqueado hasta completar esta puerta.
+**Resultado parcial:** la causa raíz quedó confirmada y corregida: Bootstrap era la escena 0 sin ningún cargador runtime. Builder, EditMode 23/23, PlayMode 8/8 y el APK `/tmp/lumbre-h8-1-black-screen-debug.apk` están verificados. No hay dispositivo ADB conectado, por lo que la instalación, logcat y los cinco arranques físicos siguen pendientes como puerta de aceptación Android de H9.
 
-### H9 — Perfilado Android
+### H9 — Vertical Slice Polish
 
-**Entregables:** perfil de CPU/GPU/memoria, captura de FPS, temperatura y batería en el dispositivo de referencia.
+**Entregables:** cámara Cinemachine pulida con límites, safe area de `PlayerUI`, controles móviles reespaciados, HUD compacto, menús adaptables, feedback de selección y builder idempotente. La prueba física debe aportar las capturas Android y las métricas de FPS/memoria del dispositivo de referencia.
 
-**Criterio de salida:** al menos 30 FPS sostenidos durante 15 minutos, sin crash y sin hitch mayor de 250 ms; no se amplía contenido si no se cumple.
+**Criterio de salida:** el slice conserva las reglas H3–H8, el avatar completa el recorrido sin zonas negras, la UI respeta safe area en relaciones horizontales objetivo, cámara/controles/HUD/menús pasan sus pruebas y el APK Android compila. La aceptación física de FPS, memoria, temperatura y batería requiere hardware conectado; no se declara cerrada sin esa evidencia.
+
+**Resultado:** pulido de presentación implementado en v0.8.1 Alpha. `H9VerticalSlicePolishBuilder` terminó con código 0 y la validación estructural de escena pasó. EditMode/PlayMode automáticos y la captura física Android quedan pendientes de un entorno con runner .NET y dispositivo ADB; no se inicia H10.
 
 ### H10 — Demo candidata
 

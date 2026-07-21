@@ -1,5 +1,27 @@
 # Changelog técnico
 
+## 2026-07-21 — H9 pulido del vertical slice para Android — v0.8.1 Alpha
+
+### Incluido
+
+- Cámara Cinemachine con composición más cómoda, seguimiento amortiguado, zoom de presentación y límites para evitar zonas negras.
+- Safe area dedicada para toda la UI de `PlayerUI`, manteniendo CanvasScaler adaptable en landscape.
+- Joystick ampliado y controles móviles reespaciados con transiciones de selección más claras.
+- HUD compacto de estado/misión y panel contextual de interacción, con menos espacio desperdiciado.
+- Pausa y opciones reacomodadas para resoluciones Android horizontales, conservando la configuración local H8.
+- `H9VerticalSlicePolishBuilder` idempotente y `H9VerticalSlicePolishPlayModeTests` para cámara, HUD, controles y safe area.
+- Versión del proyecto actualizada a v0.8.1 Alpha y documentación H9 actualizada.
+
+### Validación
+
+- Builder H9 ejecutado en batchmode y validación de escena completada con código de salida 0.
+- El runner automático de Unity no produjo XML en este entorno porque falta el .NET SDK requerido por `build-server`; queda pendiente repetir EditMode/PlayMode con el runtime de pruebas disponible.
+- Build Android físico y capturas de dispositivo quedan pendientes: `adb devices -l` no detectó hardware conectado.
+
+### Límite explícito
+
+H9 modifica únicamente presentación, UX y preparación Android. No añade enemigos, NPC, mapas, habilidades, misiones, loot, economía, networking ni backend.
+
 ## 2026-07-20 — H8.1 diagnóstico y corrección de pantalla negra Android — v0.8.0 Alpha
 
 ### Incluido

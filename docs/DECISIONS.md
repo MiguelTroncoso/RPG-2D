@@ -343,6 +343,15 @@
 - **Fecha:** 2026-07-20
 - **Estado:** aprobada durante H8.1
 - **Problema:** un APK puede compilar correctamente y aun así permanecer en una escena vacía después del splash; los tests que cargan `VerticalSlice` directamente no cubren la ruta real de arranque.
-- **Decisión:** H8.1 debe verificar la transición real `Bootstrap` índice 0 → `VerticalSlice` y completar cinco arranques en un Android físico antes de iniciar H9. La validación Editor/APK no sustituye la prueba de hardware.
+- **Decisión:** H8.1 debe verificar la transición real `Bootstrap` índice 0 → `VerticalSlice` y completar cinco arranques en un Android físico antes de cerrar la puerta Android de H9. La validación Editor/APK no sustituye la prueba de hardware.
 - **Motivo:** separa una regresión de arranque de los problemas de rendimiento y temperatura que H9 debe medir, y evita declarar el vertical slice jugable sin evidencia del dispositivo objetivo.
-- **Consecuencias:** H9 queda bloqueado mientras ADB no detecte un dispositivo y no existan logs de instalación limpia, segundo arranque, save, minimizar/restaurar y force close. No se amplía gameplay para resolver este bloqueo.
+- **Consecuencias:** el pulido de presentación H9 puede implementarse sin hardware, pero su aceptación Android queda bloqueada mientras ADB no detecte un dispositivo y no existan logs de instalación limpia, segundo arranque, save, minimizar/restaurar y force close. No se amplía gameplay para resolver este bloqueo.
+
+## DEC-0037 — H9 es pulido de presentación, no expansión de sistemas
+
+- **Fecha:** 2026-07-21
+- **Estado:** aprobada para H9
+- **Problema:** el vertical slice ya es jugable, pero la cámara, la densidad del HUD y la ergonomía móvil todavía podían hacer que la demo pareciera un prototipo.
+- **Decisión:** H9 modifica únicamente composición Cinemachine, límites de cámara, safe area, layout de controles, HUD, menús y feedback de selección. `H9VerticalSlicePolishBuilder` conserva el scene graph y los contratos de gameplay H3–H8.
+- **Motivo:** maximiza sensación, claridad y estabilidad Android sin introducir deuda de backend ni nuevos balances antes de la revisión técnica.
+- **Consecuencias:** la validación física, capturas y métricas Android siguen siendo una puerta explícita; no se declara cerrado el rendimiento de hardware sin un dispositivo real.

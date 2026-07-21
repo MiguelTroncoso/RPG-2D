@@ -90,6 +90,18 @@ H8 amplía únicamente la presentación y las herramientas de validación:
 
 La frontera sigue siendo: dominio/aplicación deciden estado; infraestructura local lo persiste; cliente y presentación presentan. H8 no introduce autoridad paralela, red, Addressables ni una abstracción de configuración dentro del dominio.
 
+## Pulido de vertical slice H9
+
+H9 mantiene la misma frontera y solo refina la presentación existente:
+
+- `H9SafeAreaLayout` contiene la raíz de `PlayerUI` dentro de `Screen.safeArea`; controles, HUD y menús continúan siendo consumidores de los mismos contratos H3–H8.
+- `H9VerticalSlicePolishBuilder` es idempotente y modifica únicamente jerarquía/layout UI, parámetros de Cinemachine, collider de límites visuales y versión de presentación.
+- `H7CameraPolish` conserva el target oficial y aplica composición, amortiguación y zoom sin decidir movimiento ni colisiones.
+- `H7StatusHud` y `H5MissionHud` siguen leyendo estado de combate, misión, inventario y progresión; el segundo solo muestra prompts contextuales y nunca ejecuta reglas.
+- La preparación Android usa `PlayerSettings`/BuildPipeline y una captura física solo se considera válida cuando proviene de un dispositivo conectado, no de una simulación del editor.
+
+No se añaden sistemas de servidor, networking, economía, drops, misiones, habilidades ni nuevos actores. La migración offline → online definida arriba permanece intacta.
+
 ## Riesgos pendientes
 
-La interfaz de sesión no define aún serialización, autenticación, reconciliación, tick rate ni transporte. Es intencional: esas decisiones pertenecen al spike online posterior a la demo y no deben simularse en H8. Los modelos de combate, habilidades, misión, inventario y progresión son puros y el cliente solo los adapta; una futura sesión autoritativa deberá recalcular Calor, cooldown, duración, daño, salud, muerte, progreso, XP, nivel, entrega y equipamiento en servidor. El save local y las preferencias H8 quedan como formatos locales de transición controlada, no como autoridad online.
+La interfaz de sesión no define aún serialización, autenticación, reconciliación, tick rate ni transporte. Es intencional: esas decisiones pertenecen al spike online posterior a la demo y no deben simularse en H9. Los modelos de combate, habilidades, misión, inventario y progresión son puros y el cliente solo los adapta; una futura sesión autoritativa deberá recalcular Calor, cooldown, duración, daño, salud, muerte, progreso, XP, nivel, entrega y equipamiento en servidor. El save local y las preferencias H8 quedan como formatos locales de transición controlada, no como autoridad online.

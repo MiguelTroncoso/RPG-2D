@@ -2,7 +2,7 @@
 
 Documento de orientación inicial para un MMORPG 2D isométrico, original y orientado primero a Android.
 
-> Estado: v0.8.0 Alpha · H8.1 — pantalla negra diagnosticada y corregida en la ruta Bootstrap → VerticalSlice; validación física de Android pendiente. H0–H8 estables.
+> Estado: v0.8.1 Alpha · H9 — pulido del vertical slice para Android; validación física de Android pendiente. H0–H8.1 estables.
 
 ## Resumen
 
@@ -35,7 +35,7 @@ La propuesta no intenta ganar por tamaño desde el primer día. El objetivo inic
 - [Architecture](docs/ARCHITECTURE.md): módulos, dependencias y frontera offline/online.
 - [Android build](docs/ANDROID_BUILD.md): configuración horizontal y procedimiento de build.
 - [Testing](docs/TESTING.md): estrategia y comandos de verificación.
-- [Changelog](docs/CHANGELOG.md): bitácora reproducible de H1–H8.1.
+- [Changelog](docs/CHANGELOG.md): bitácora reproducible de H1–H9.
 - [H2 greybox](docs/H2_GREYBOX.md): zonas, grid, colisiones, navegación y presupuesto estructural.
 - [H3 player control](docs/H3_PLAYER_CONTROL.md): Layers, Gizmos, input, movimiento, cámara, colisiones y respawn.
 - [H4 combat prototype](docs/H4_COMBAT_PROTOTYPE.md): Mordeluz, salud, daño, cooldown, IA, muerte y feedback.
@@ -45,11 +45,12 @@ La propuesta no intenta ganar por tamaño desde el primer día. El objetivo inic
 - [H7 art, audio and presentation](docs/H7_ART_AUDIO_POLISH.md): arte base original, animaciones, VFX, audio, HUD y cámara.
 - [H8 optimization and UX](docs/H8_OPTIMIZATION_UX.md): rendimiento de presentación, pausa, opciones, configuración local, tooltips y overlay de QA.
 - [H8.1 Android black screen](docs/H8_1_ANDROID_BLACK_SCREEN.md): diagnóstico, corrección de Bootstrap y checklist físico pendiente.
+- [H9 vertical slice polish](docs/H9_VERTICAL_SLICE_POLISH.md): cámara, safe area, controles, HUD, menús y validación Android.
 
 ## Qué no se implementa todavía
 
-H8.1 conserva la optimización de presentación, HUD refinado, pausa, opciones locales y herramientas de QA, y corrige la ruta de arranque real desde Bootstrap. Todavía no implementa crafting, tienda, economía, monedas, profesiones, atributos avanzados, más niveles, varias partidas, nube, cuentas, login, backend online, networking, servidor, multiplayer ni arte final de producción. El slice actual permite recorrer el mundo, completar la misión de Nara, alcanzar nivel 2, equipar la recompensa, recargar el progreso local y configurar la experiencia sin cambiar las reglas de H3–H8.
+H9 conserva la optimización de presentación y pule exclusivamente la experiencia del vertical slice: cámara, safe area, controles, HUD, menús, feedback y preparación Android. Todavía no implementa crafting, tienda, economía, monedas, profesiones, atributos avanzados, más niveles, varias partidas, nube, cuentas, login, backend online, networking, servidor, multiplayer ni arte final de producción. El slice actual permite recorrer el mundo, completar la misión de Nara, alcanzar nivel 2, equipar la recompensa, recargar el progreso local y configurar la experiencia sin cambiar las reglas de H3–H8.
 
 ## Próximo paso propuesto
 
-El siguiente hito propuesto es H9 — perfilado en un Android de gama media, pero solo después de instalar el APK H8.1 y completar los cinco arranques físicos. No se añadirá tienda, economía, VIP ni multiplayer antes de esa puerta.
+La siguiente acción es la revisión técnica del repositorio y la validación física del APK H9 en un Android de referencia. El objetivo de versión posterior es v0.9.0 Alpha; no se inicia H10 ni se añaden sistemas nuevos antes de esa revisión.

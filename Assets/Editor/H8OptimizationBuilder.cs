@@ -188,7 +188,7 @@ namespace Lumbre.Game.Editor
 
             try
             {
-                PlayerSettings.bundleVersion = "0.8.0 Alpha-debug";
+                PlayerSettings.bundleVersion = "0.8.1 Alpha-debug";
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
                 PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
                 PlayerSettings.SetGraphicsAPIs(BuildTarget.Android,
@@ -442,7 +442,8 @@ namespace Lumbre.Game.Editor
 
         private static GameObject FindOrCreateUi(string name, Transform parent)
         {
-            var existing = parent.Find(name)?.gameObject;
+            var existing = parent.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(transform => transform.name == name)?.gameObject;
             if (existing != null)
             {
                 existing.layer = ProjectLayers.PlayerUi;

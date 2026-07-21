@@ -306,6 +306,41 @@ Checklist físico pendiente:
 
 En cada caso deben aparecer `[BOOT] Bootstrap Awake`, `[BOOT] Bootstrap Start`, `[BOOT] Loading VerticalSlice`, `[BOOT] VerticalSlice activated`, jugador, cámara y HUD, sin pantalla negra, crash ni `AndroidRuntime` fatal. H9 no se inicia hasta cerrar este checklist.
 
+## H9 pulido del vertical slice
+
+`H9VerticalSlicePolishPlayModeTests` valida la escena y el builder: la raíz `H9_SafeAreaRoot` usa `Screen.safeArea`, el Canvas mantiene la referencia 1920×1080, la cámara oficial conserva seguimiento Cinemachine, damping, composición, zoom y confiner, y el joystick, botones y HUD respetan el layout compacto. `H9VerticalSlicePolishBuilder.Validate` ejecuta la comprobación estructural sin reconstruir gameplay.
+
+Builder y validación reproducibles:
+
+```bash
+"/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -nographics -quit \
+  -projectPath "/Users/migueltroncoso/Documents/Juego 2D" \
+  -executeMethod Lumbre.Game.Editor.H9VerticalSlicePolishBuilder.Build \
+  -logFile /tmp/lumbre-h9-builder.log
+```
+
+```bash
+"/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -nographics -quit \
+  -projectPath "/Users/migueltroncoso/Documents/Juego 2D" \
+  -executeMethod Lumbre.Game.Editor.H9VerticalSlicePolishBuilder.Validate \
+  -logFile /tmp/lumbre-h9-validate.log
+```
+
+Suite automática prevista:
+
+```bash
+"/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -nographics -projectPath "/Users/migueltroncoso/Documents/Juego 2D" \
+  -runTests -testPlatform playmode \
+  -testResults /tmp/lumbre-h9-playmode.xml \
+  -testFilter Lumbre.Game.Tests \
+  -quit -logFile /tmp/lumbre-h9-playmode.log
+```
+
+Resultado de esta estación: builder y validación estructural terminaron con código 0; Unity 6 no generó XML de EditMode/PlayMode porque su runner intentó invocar `build-server`, ausente en la instalación del editor, incluso con un .NET SDK local aislado. Debe repetirse en una estación con el runner completo antes de declarar las suites H9 en verde. El APK H9 sí terminó correctamente en `/tmp/lumbre-h9-android.apk`.
+
 ## Criterio de calidad H4–H8
 
 - cero errores de compilación;

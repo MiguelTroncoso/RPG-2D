@@ -24,6 +24,8 @@
 - H8 mantiene el Canvas con canales adicionales desactivados, texturas sin mipmaps/readable, Animator con culling, VSync desactivado y objetivo de 60 FPS.
 - H8 ofrece pausa, opciones y configuración local de música, FX, vibración, calidad, FPS y debug. Estas preferencias no modifican el save de partida H6.
 - H8 incorpora un overlay de QA con FPS, frame time, memoria, GC y draw calls; permanece oculto salvo que se active desde opciones.
+- H9 añade una raíz de safe area para `PlayerUI`, reespacia joystick/botones, compacta HUD/menús y configura la cámara Cinemachine con límites de presentación.
+- H9 conserva landscape como orientación de la demo; no añade una ruta portrait ni cambia la simulación de gameplay.
 - Backend, firma, iconos y permisos de producción quedan fuera de H1.
 
 ## Abrir y ejecutar
@@ -96,6 +98,20 @@ ADB="/Applications/Unity/Hub/Editor/6000.3.20f1/PlaybackEngines/AndroidPlayer/SD
 
 El package id del APK debug es `com.LumbredeNacarStudio.LumbredeNcar`; debe confirmarse si se modifica la configuración Android antes de instalar. Guardar el logcat limpio y filtrado fuera del repositorio si contiene datos del dispositivo. H8.1 exige cinco arranques físicos y no se considera cerrado mientras `adb devices -l` esté vacío.
 
-## Perfilado pendiente de H9
+## Build Android H9
 
-H8 deja preparado el overlay y el build de desarrollo, pero no sustituye una medición en hardware. H9 debe registrar FPS sostenidos, frame time, memoria, draw calls, temperatura, batería y tiempos de carga en al menos un Android de gama media durante 15 minutos. Si aparecen hitches por transparencia, audio, Canvas o partículas, se corregirá la presentación antes de ampliar contenido.
+El builder H9 prepara la escena existente sin reconstruir gameplay y genera un APK ARM64 de desarrollo:
+
+```bash
+"/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -nographics -quit \
+  -projectPath "/Users/migueltroncoso/Documents/Juego 2D" \
+  -executeMethod Lumbre.Game.Editor.H9VerticalSlicePolishBuilder.BuildAndroidDevelopment \
+  -logFile /tmp/lumbre-h9-android-build.log
+```
+
+Salida esperada: `/tmp/lumbre-h9-android.apk`. El APK no se versiona por `.gitignore`. La ejecución física debe registrar capturas del arranque, recorrido, HUD/controles, pausa y safe area en el dispositivo de referencia.
+
+## Validación pendiente de hardware H9
+
+El entorno local no tiene un Android conectado: `adb devices -l` solo muestra el encabezado. Por tanto, no se afirma todavía un resultado físico ni se agregan capturas simuladas como si fueran de dispositivo. H9 debe registrar FPS sostenidos, frame time, memoria, draw calls, temperatura, batería y tiempos de carga en al menos un Android de gama media durante 15 minutos. Si aparecen hitches por transparencia, audio, Canvas o partículas, se corrige la presentación antes de ampliar contenido.

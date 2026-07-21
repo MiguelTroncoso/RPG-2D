@@ -331,7 +331,8 @@ namespace Lumbre.Game.Editor
 
         private static GameObject FindOrCreateUi(string name, Transform parent)
         {
-            var existing = parent.Find(name)?.gameObject;
+            var existing = parent.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(transform => transform.name == name)?.gameObject;
             if (existing != null)
             {
                 return existing;

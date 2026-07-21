@@ -1,3 +1,4 @@
+using System;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -51,12 +52,20 @@ namespace Lumbre.Game.Client.Presentation
                 return;
             }
 
-            _drawCalls = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
-            _gcReserved = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
-            _systemMemory = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
-            _mainThreadFrameTime = ProfilerRecorder.StartNew(ProfilerCategory.Internal,
-                "Main Thread Frame Time");
-            _gpuFrameTime = ProfilerRecorder.StartNew(ProfilerCategory.Render, "GPU Frame Time");
+            try
+            {
+                _drawCalls = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
+                _gcReserved = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
+                _systemMemory = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
+                _mainThreadFrameTime = ProfilerRecorder.StartNew(ProfilerCategory.Internal,
+                    "Main Thread Frame Time");
+                _gpuFrameTime = ProfilerRecorder.StartNew(ProfilerCategory.Render, "GPU Frame Time");
+            }
+            catch (Exception exception)
+            {
+                DisposeRecorders();
+                Debug.LogWarning($"[H8] Optional performance recorder unavailable: {exception.Message}");
+            }
         }
 
         private void Update()
@@ -109,29 +118,39 @@ namespace Lumbre.Game.Client.Presentation
 
         private void OnDisable()
         {
+            DisposeRecorders();
+        }
+
+        private void DisposeRecorders()
+        {
             if (_drawCalls.Valid)
             {
                 _drawCalls.Dispose();
+                _drawCalls = default;
             }
 
             if (_gcReserved.Valid)
             {
                 _gcReserved.Dispose();
+                _gcReserved = default;
             }
 
             if (_systemMemory.Valid)
             {
                 _systemMemory.Dispose();
+                _systemMemory = default;
             }
 
             if (_mainThreadFrameTime.Valid)
             {
                 _mainThreadFrameTime.Dispose();
+                _mainThreadFrameTime = default;
             }
 
             if (_gpuFrameTime.Valid)
             {
                 _gpuFrameTime.Dispose();
+                _gpuFrameTime = default;
             }
         }
 

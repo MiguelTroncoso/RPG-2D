@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Lumbre.Game.Client.Presentation
@@ -37,40 +38,92 @@ namespace Lumbre.Game.Client.Presentation
 
         public static H8SettingsSnapshot Load()
         {
-            var defaults = Defaults;
-            return new H8SettingsSnapshot(
-                Mathf.Clamp01(PlayerPrefs.GetFloat(MusicVolumeKey, defaults.MusicVolume)),
-                Mathf.Clamp01(PlayerPrefs.GetFloat(FxVolumeKey, defaults.FxVolume)),
-                PlayerPrefs.GetInt(VibrationKey, defaults.VibrationEnabled ? 1 : 0) != 0,
-                PlayerPrefs.GetInt(ShowFpsKey, defaults.ShowFps ? 1 : 0) != 0,
-                PlayerPrefs.GetInt(ShowDebugKey, defaults.ShowDebug ? 1 : 0) != 0,
-                Mathf.Max(0, PlayerPrefs.GetInt(QualityKey, defaults.QualityLevel)));
+            try
+            {
+                var defaults = Defaults;
+                return new H8SettingsSnapshot(
+                    ReadFiniteNormalized(MusicVolumeKey, defaults.MusicVolume),
+                    ReadFiniteNormalized(FxVolumeKey, defaults.FxVolume),
+                    ReadToggle(VibrationKey, defaults.VibrationEnabled),
+                    ReadToggle(ShowFpsKey, defaults.ShowFps),
+                    ReadToggle(ShowDebugKey, defaults.ShowDebug),
+                    ReadQuality(defaults.QualityLevel));
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[H8] Local settings fallback applied: {exception.Message}");
+                return Defaults;
+            }
         }
 
         public static void Save(H8SettingsSnapshot settings)
         {
-            PlayerPrefs.SetFloat(MusicVolumeKey, Mathf.Clamp01(settings.MusicVolume));
-            PlayerPrefs.SetFloat(FxVolumeKey, Mathf.Clamp01(settings.FxVolume));
-            PlayerPrefs.SetInt(VibrationKey, settings.VibrationEnabled ? 1 : 0);
-            PlayerPrefs.SetInt(ShowFpsKey, settings.ShowFps ? 1 : 0);
-            PlayerPrefs.SetInt(ShowDebugKey, settings.ShowDebug ? 1 : 0);
-            PlayerPrefs.SetInt(QualityKey, Mathf.Max(0, settings.QualityLevel));
-            PlayerPrefs.Save();
+            try
+            {
+                PlayerPrefs.SetFloat(MusicVolumeKey, ClampFinite(settings.MusicVolume, 1f));
+                PlayerPrefs.SetFloat(FxVolumeKey, ClampFinite(settings.FxVolume, 1f));
+                PlayerPrefs.SetInt(VibrationKey, settings.VibrationEnabled ? 1 : 0);
+                PlayerPrefs.SetInt(ShowFpsKey, settings.ShowFps ? 1 : 0);
+                PlayerPrefs.SetInt(ShowDebugKey, settings.ShowDebug ? 1 : 0);
+                PlayerPrefs.SetInt(QualityKey, SanitizeQuality(settings.QualityLevel));
+                PlayerPrefs.Save();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[H8] Local settings save skipped: {exception.Message}");
+            }
         }
 
         public static void ResetForQa()
         {
-            PlayerPrefs.DeleteKey(MusicVolumeKey);
-            PlayerPrefs.DeleteKey(FxVolumeKey);
-            PlayerPrefs.DeleteKey(VibrationKey);
-            PlayerPrefs.DeleteKey(ShowFpsKey);
-            PlayerPrefs.DeleteKey(ShowDebugKey);
-            PlayerPrefs.DeleteKey(QualityKey);
-            PlayerPrefs.Save();
+            try
+            {
+                PlayerPrefs.DeleteKey(MusicVolumeKey);
+                PlayerPrefs.DeleteKey(FxVolumeKey);
+                PlayerPrefs.DeleteKey(VibrationKey);
+                PlayerPrefs.DeleteKey(ShowFpsKey);
+                PlayerPrefs.DeleteKey(ShowDebugKey);
+                PlayerPrefs.DeleteKey(QualityKey);
+                PlayerPrefs.Save();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[H8] Local settings reset skipped: {exception.Message}");
+            }
         }
 
         private static int DefaultQualityLevel => QualitySettings.names.Length == 0
             ? 0
             : Mathf.Clamp(QualitySettings.GetQualityLevel(), 0, QualitySettings.names.Length - 1);
+
+        private static float ReadFiniteNormalized(string key, float fallback)
+        {
+            return ClampFinite(PlayerPrefs.GetFloat(key, fallback), fallback);
+        }
+
+        private static bool ReadToggle(string key, bool fallback)
+        {
+            return PlayerPrefs.GetInt(key, fallback ? 1 : 0) != 0;
+        }
+
+        private static int ReadQuality(int fallback)
+        {
+            return SanitizeQuality(PlayerPrefs.GetInt(QualityKey, fallback));
+        }
+
+        private static float ClampFinite(float value, float fallback)
+        {
+            return float.IsNaN(value) || float.IsInfinity(value) ? fallback : Mathf.Clamp01(value);
+        }
+
+        private static int SanitizeQuality(int value)
+        {
+            if (QualitySettings.names.Length == 0)
+            {
+                return 0;
+            }
+
+            return Mathf.Clamp(value, 0, QualitySettings.names.Length - 1);
+        }
     }
 }

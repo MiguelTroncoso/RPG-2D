@@ -1,12 +1,15 @@
 using System;
+using System.IO;
 using System.Linq;
 using Lumbre.Game.Client;
+using Lumbre.Game.Client.Bootstrap;
 using Lumbre.Game.Client.Presentation;
 using Lumbre.Game.Domain.Constants;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 namespace Lumbre.Game.Editor
@@ -20,6 +23,8 @@ namespace Lumbre.Game.Editor
         public static void Build()
         {
             H7PresentationBuilder.Build();
+            ConfigureBootstrapScene();
+            ValidateBuildSettings();
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             ConfigureCanvas();
             ConfigureScenePresentation();
@@ -136,6 +141,108 @@ namespace Lumbre.Game.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             EditorSceneManager.SaveScene(scene, ScenePath);
+        }
+
+        public static void ValidateBuildSettings()
+        {
+            var scenes = EditorBuildSettings.scenes;
+            if (scenes == null || scenes.Length == 0)
+            {
+                throw new InvalidOperationException("H8.1 requires a non-empty Build Settings scene list.");
+            }
+
+            if (!scenes[0].enabled || scenes[0].path != ProjectConstants.BootstrapScenePath)
+            {
+                throw new InvalidOperationException(
+                    $"H8.1 requires Bootstrap enabled at build index 0, found '{scenes[0].path}'.");
+            }
+
+            var verticalSlice = scenes.FirstOrDefault(scene =>
+                scene.enabled && scene.path == ProjectConstants.VerticalSliceScenePath);
+            var projectRoot = Directory.GetParent(Application.dataPath)?.FullName;
+            var verticalSliceFile = projectRoot == null
+                ? string.Empty
+                : Path.Combine(projectRoot, ProjectConstants.VerticalSliceScenePath);
+            if (verticalSlice == null || !File.Exists(verticalSliceFile))
+            {
+                throw new InvalidOperationException("H8.1 requires enabled VerticalSlice in Build Settings.");
+            }
+
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ProjectConstants.BootstrapScenePath) == null
+                || AssetDatabase.LoadAssetAtPath<SceneAsset>(ProjectConstants.VerticalSliceScenePath) == null)
+            {
+                throw new InvalidOperationException("H8.1 Build Settings references a missing scene asset.");
+            }
+        }
+
+        public static void BuildAndroidBlackScreenDebug()
+        {
+            Build();
+            ValidateBuildSettings();
+
+            const string outputPath = "/tmp/lumbre-h8-1-black-screen-debug.apk";
+            var originalVersion = PlayerSettings.bundleVersion;
+            var originalArchitectures = PlayerSettings.Android.targetArchitectures;
+            var originalUseDefaultGraphics = PlayerSettings.GetUseDefaultGraphicsAPIs(BuildTarget.Android);
+            var originalGraphics = PlayerSettings.GetGraphicsAPIs(BuildTarget.Android);
+
+            try
+            {
+                PlayerSettings.bundleVersion = "0.8.0 Alpha-debug";
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+                PlayerSettings.SetGraphicsAPIs(BuildTarget.Android,
+                    new[] { GraphicsDeviceType.OpenGLES3 });
+
+                var options = new BuildPlayerOptions
+                {
+                    scenes = EditorBuildSettings.scenes
+                        .Where(scene => scene.enabled)
+                        .Select(scene => scene.path)
+                        .ToArray(),
+                    locationPathName = outputPath,
+                    target = BuildTarget.Android,
+                    options = BuildOptions.Development | BuildOptions.AllowDebugging
+                        | BuildOptions.ConnectWithProfiler
+                };
+                var report = BuildPipeline.BuildPlayer(options);
+                if (report.summary.result != BuildResult.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        $"H8.1 Android debug build failed: {report.summary.result} "
+                        + $"({report.summary.totalErrors} errors).");
+                }
+
+                Debug.Log($"H8.1 Android black-screen debug build succeeded: {outputPath} "
+                    + $"({report.summary.totalSize} bytes).");
+            }
+            finally
+            {
+                PlayerSettings.bundleVersion = originalVersion;
+                PlayerSettings.Android.targetArchitectures = originalArchitectures;
+                PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, originalUseDefaultGraphics);
+                if (!originalUseDefaultGraphics && originalGraphics != null && originalGraphics.Length > 0)
+                {
+                    PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, originalGraphics);
+                }
+
+                AssetDatabase.SaveAssets();
+            }
+        }
+
+        private static void ConfigureBootstrapScene()
+        {
+            var scene = EditorSceneManager.OpenScene(ProjectConstants.BootstrapScenePath, OpenSceneMode.Single);
+            var loader = GameObject.Find("H8_1_BootstrapLoader");
+            if (loader == null)
+            {
+                loader = new GameObject("H8_1_BootstrapLoader");
+            }
+
+            loader.layer = 0;
+            GetOrAdd<BootstrapSceneLoader>(loader);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene, ProjectConstants.BootstrapScenePath);
         }
 
         public static void BuildAndroidDevelopment()

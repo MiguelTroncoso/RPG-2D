@@ -67,10 +67,22 @@ namespace Lumbre.Game.Client.Presentation
 
         private void Awake()
         {
+            IsPaused = false;
+            OptionsVisible = false;
+            Time.timeScale = 1f;
             audioFeedback ??= FindFirstObjectByType<H7AudioFeedback>();
             performanceOverlay ??= FindFirstObjectByType<H8PerformanceOverlay>();
             _settings = H8LocalSettings.Load();
-            ApplySettings();
+            try
+            {
+                ApplySettings();
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning($"[H8] Presentation settings fallback applied: {exception.Message}");
+                Time.timeScale = 1f;
+            }
+
             SetPaused(false);
         }
 
@@ -217,6 +229,7 @@ namespace Lumbre.Game.Client.Presentation
 
             UnityEngine.Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
+            Time.timeScale = 1f;
         }
 
         private void ApplySettingsToControls()

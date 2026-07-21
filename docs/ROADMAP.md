@@ -1,6 +1,6 @@
 # Lumbre de Nácar — Roadmap por hitos verificables
 
-> Versión: 1.3 · Estado: H8 completado · Fecha: 2026-07-20
+> Versión: 1.4 · Estado: H8.1 corregido; validación física pendiente · Fecha: 2026-07-20
 
 Este roadmap separa la primera demo de la producción online. Cada hito tiene un resultado pequeño y un criterio de salida. H0 y el vertical slice reducido están aprobados; H1 está autorizado con Unity 6.3 LTS, Input System multiplataforma y Cinemachine.
 
@@ -22,7 +22,8 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 | H6 — Progresión y guardado | Nivel 1→2, save versionado y restauración | Media | H5 |
 | H7 — Arte base y pulido | Arte original base, animaciones, VFX, audio, HUD y cámara | Media | H6 |
 | H8 — Optimización, UX y preparación | Pausa, opciones, configuración local, HUD refinado y perfilado QA | Media | H7 |
-| H9 — Perfilado Android | FPS, memoria, temperatura y batería medidos | Alta | H8 |
+| H8.1 — Arranque Android | Diagnóstico y corrección de pantalla negra; APK debug y checklist físico | Alta | H8 |
+| H9 — Perfilado Android | FPS, memoria, temperatura y batería medidos | Alta | H8.1 |
 | H10 — Demo candidata | Corrección de bugs y prueba con persona externa | Media | H9 |
 
 ### H0 — Aprobación de alcance
@@ -102,6 +103,14 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 **Criterio de salida:** el vertical slice conserva las reglas H3–H7, el jugador puede pausar, continuar, cambiar opciones, volver al juego y salir; música, FX, vibración, FPS, debug y calidad se guardan como configuración local; el HUD y los tooltips están configurados; el builder y las suites EditMode/PlayMode terminan en verde; no quedan errores críticos del proyecto. El build Android se genera correctamente. Las métricas de FPS sostenidos, temperatura y batería en un teléfono físico quedan explícitamente para H9 porque no había dispositivo conectado durante H8.
 
 **Resultado:** completado. `H8OptimizationBuilder` aplica configuración de Canvas, texturas, Animator, VSync y presentación; `H8PauseController` ofrece pausa, opciones, versión visible, calidad y salida; `H8LocalSettings` persiste preferencias con `PlayerPrefs` sin tocar el save de H6; `H8PerformanceOverlay` expone métricas de QA mediante `ProfilerRecorder`; `H8Tooltip` añade ayuda contextual. El builder se ejecutó dos veces de forma idempotente, EditMode pasó 23/23, PlayMode pasó 7/7 y el APK de desarrollo Android se generó en `/tmp/lumbre-h8-android.apk`. No se añadieron sistemas de gameplay ni backend.
+
+### H8.1 — Diagnóstico y corrección de pantalla negra Android
+
+**Entregables:** causa raíz reproducible, loader Bootstrap → VerticalSlice, validación de Build Settings, trazas de arranque, fallback de cámara, settings/overlay no bloqueantes, APK debug ARM64/OpenGLES3 y checklist de hardware.
+
+**Criterio de salida:** el APK debe mostrar VerticalSlice, jugador, cámara, HUD y controles después del splash en cinco arranques físicos: instalación limpia, segundo arranque, con save, después de minimizar y después de forzar cierre. La corrección no debe introducir gameplay nuevo.
+
+**Resultado parcial:** la causa raíz quedó confirmada y corregida: Bootstrap era la escena 0 sin ningún cargador runtime. Builder, EditMode 23/23, PlayMode 8/8 y el APK `/tmp/lumbre-h8-1-black-screen-debug.apk` están verificados. No hay dispositivo ADB conectado, por lo que la instalación, logcat y los cinco arranques físicos siguen pendientes. H9 permanece bloqueado hasta completar esta puerta.
 
 ### H9 — Perfilado Android
 

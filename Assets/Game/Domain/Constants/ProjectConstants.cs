@@ -5,6 +5,8 @@ namespace Lumbre.Game.Domain.Constants
         public const string ProductName = "Lumbre de Nácar";
         public const string BootstrapScenePath = "Assets/Game/Scenes/Bootstrap.unity";
         public const string VerticalSliceScenePath = "Assets/Game/Scenes/VerticalSlice.unity";
+        public const string BootstrapSceneName = "Bootstrap";
+        public const string VerticalSliceSceneName = "VerticalSlice";
 
         public const int GreyboxGridWidth = 32;
         public const int GreyboxGridHeight = 20;

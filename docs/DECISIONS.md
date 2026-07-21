@@ -337,3 +337,12 @@
 - **Decisión:** H8 incorpora `H8OptimizationBuilder.BuildAndroidDevelopment` para generar un APK reproducible con profiler conectado. La aceptación de métricas reales de dispositivo, estabilidad térmica y consumo pertenece a H9.
 - **Motivo:** separa un fallo de empaquetado de una medición física que requiere hardware disponible y evita declarar rendimiento no observado.
 - **Consecuencias:** el APK H8 confirma compilación/package; no confirma arranque, input, memoria térmica, temperatura, batería ni FPS sostenidos en Android hasta ejecutar H9.
+
+## DEC-0036 — El arranque físico Android es prerrequisito de H9
+
+- **Fecha:** 2026-07-20
+- **Estado:** aprobada durante H8.1
+- **Problema:** un APK puede compilar correctamente y aun así permanecer en una escena vacía después del splash; los tests que cargan `VerticalSlice` directamente no cubren la ruta real de arranque.
+- **Decisión:** H8.1 debe verificar la transición real `Bootstrap` índice 0 → `VerticalSlice` y completar cinco arranques en un Android físico antes de iniciar H9. La validación Editor/APK no sustituye la prueba de hardware.
+- **Motivo:** separa una regresión de arranque de los problemas de rendimiento y temperatura que H9 debe medir, y evita declarar el vertical slice jugable sin evidencia del dispositivo objetivo.
+- **Consecuencias:** H9 queda bloqueado mientras ADB no detecte un dispositivo y no existan logs de instalación limpia, segundo arranque, save, minimizar/restaurar y force close. No se amplía gameplay para resolver este bloqueo.

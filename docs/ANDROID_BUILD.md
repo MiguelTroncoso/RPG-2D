@@ -68,6 +68,34 @@ El módulo Android está instalado en Unity 6000.3.20f1. H8 expone un builder re
 
 La ejecución H8 generó `/tmp/lumbre-h8-android.apk` sin errores de compilación del proyecto. No había un teléfono conectado: `adb devices` solo mostró el encabezado de la lista. El APK confirma el paquete y la compilación; no confirma todavía el arranque ni las métricas en hardware.
 
+## Build de diagnóstico H8.1 — pantalla negra
+
+H8.1 configura temporalmente un APK Development ARM64 con Script Debugging, Autoconnect Profiler, símbolos y OpenGLES3 como primera API gráfica. El builder restaura la configuración de proyecto después del build:
+
+```bash
+"/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity" \
+  -batchmode -nographics -quit \
+  -projectPath "/Users/migueltroncoso/Documents/Juego 2D" \
+  -executeMethod Lumbre.Game.Editor.H8OptimizationBuilder.BuildAndroidBlackScreenDebug \
+  -logFile /tmp/lumbre-h8-1-android-build.log
+```
+
+Salida verificada: `/tmp/lumbre-h8-1-black-screen-debug.apk` (82 MB, build Android exitoso). El APK no se versiona por `.gitignore`.
+
+Con un dispositivo conectado, usar el ADB incluido con Unity:
+
+```bash
+ADB="/Applications/Unity/Hub/Editor/6000.3.20f1/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb"
+"$ADB" devices -l
+"$ADB" install -r /tmp/lumbre-h8-1-black-screen-debug.apk
+"$ADB" logcat -c
+"$ADB" shell am force-stop com.LumbredeNacarStudio.LumbredeNcar
+"$ADB" shell monkey -p com.LumbredeNacarStudio.LumbredeNcar 1
+"$ADB" logcat -v time -s Unity ActivityManager AndroidRuntime libc DEBUG
+```
+
+El package id del APK debug es `com.LumbredeNacarStudio.LumbredeNcar`; debe confirmarse si se modifica la configuración Android antes de instalar. Guardar el logcat limpio y filtrado fuera del repositorio si contiene datos del dispositivo. H8.1 exige cinco arranques físicos y no se considera cerrado mientras `adb devices -l` esté vacío.
+
 ## Perfilado pendiente de H9
 
 H8 deja preparado el overlay y el build de desarrollo, pero no sustituye una medición en hardware. H9 debe registrar FPS sostenidos, frame time, memoria, draw calls, temperatura, batería y tiempos de carga en al menos un Android de gama media durante 15 minutos. Si aparecen hitches por transparencia, audio, Canvas o partículas, se corregirá la presentación antes de ampliar contenido.

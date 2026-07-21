@@ -284,6 +284,28 @@ Pruebas finales:
 - El APK Android de desarrollo se generó en `/tmp/lumbre-h8-android.apk`; el módulo Android/SDK/NDK/OpenJDK está instalado.
 - No había dispositivo conectado: `adb devices` no mostró entradas. El arranque y las métricas de hardware quedan pendientes de H9.
 
+## H8.1 diagnóstico de arranque Android
+
+`H8_1BootstrapPlayModeTests` carga la escena real `Bootstrap`, espera la transición a `VerticalSlice` y comprueba Build Settings, jugador, cámara principal/Cinemachine, Canvas, `InputSystemUIInputModule`, AudioListener, HUD, paneles cerrados, `Time.timeScale` y fallback para preferencias locales inválidas. El builder valida Bootstrap en índice 0 y VerticalSlice habilitada antes de cualquier APK.
+
+Resultado reproducible:
+
+- Builder H8.1: código de salida 0.
+- EditMode: 23/23 pasados.
+- PlayMode: 8/8 pasados.
+- APK: `/tmp/lumbre-h8-1-black-screen-debug.apk`.
+- Logcat físico: pendiente; el ADB de Unity mostró lista de dispositivos vacía.
+
+Checklist físico pendiente:
+
+1. Instalación limpia y captura de logcat.
+2. Segundo arranque.
+3. Arranque con save local.
+4. Arranque después de minimizar y restaurar.
+5. Arranque después de forzar cierre.
+
+En cada caso deben aparecer `[BOOT] Bootstrap Awake`, `[BOOT] Bootstrap Start`, `[BOOT] Loading VerticalSlice`, `[BOOT] VerticalSlice activated`, jugador, cámara y HUD, sin pantalla negra, crash ni `AndroidRuntime` fatal. H9 no se inicia hasta cerrar este checklist.
+
 ## Criterio de calidad H4–H8
 
 - cero errores de compilación;

@@ -1,5 +1,27 @@
 # Changelog técnico
 
+## 2026-07-20 — H8.1 diagnóstico y corrección de pantalla negra Android — v0.8.0 Alpha
+
+### Incluido
+
+- Causa raíz confirmada: `Bootstrap` era la escena 0, pero no cargaba `VerticalSlice`.
+- `BootstrapSceneLoader` con carga asíncrona, progreso y trazas `[BOOT]` de diagnóstico.
+- Validación automática de Build Settings y configuración del loader desde `H8OptimizationBuilder`.
+- Fallback de cámara estática si la cámara oficial/Cinemachine no está disponible.
+- Sanitización de `PlayerPrefs`, inicialización segura de pausa y `ProfilerRecorder` opcional no bloqueante.
+- Prueba PlayMode de arranque Bootstrap → VerticalSlice y APK debug ARM64/OpenGLES3.
+
+### Validación
+
+- EditMode: 23/23 pasados.
+- PlayMode: 8/8 pasados.
+- APK generado: `/tmp/lumbre-h8-1-black-screen-debug.apk`.
+- No se detectaron dispositivos ADB; instalación, logcat y cinco arranques físicos quedan pendientes.
+
+### Límite explícito
+
+H8.1 corrige la ruta de arranque sin añadir gameplay. H9 no puede comenzar hasta confirmar el arranque en un Android físico.
+
 ## 2026-07-20 — H8 optimización, UX y preparación del vertical slice completado — v0.8.0 Alpha
 
 ### Incluido

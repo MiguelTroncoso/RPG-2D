@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lumbre.Game.Client;
+using Lumbre.Game.Client.Camera;
 using Lumbre.Game.Client.Presentation;
 using Lumbre.Game.Domain.Constants;
 using Unity.Cinemachine;
@@ -370,8 +371,20 @@ namespace Lumbre.Game.Editor
             var lens = cmCamera.Lens;
             lens.OrthographicSize = CameraZoom;
             cmCamera.Lens = lens;
-            follow.FollowOffset = new Vector3(0f, 0.65f, -20f);
+            var compositionOffset = new Vector3(0f, 0.65f, -20f);
+            follow.FollowOffset = compositionOffset;
             follow.TrackerSettings.PositionDamping = new Vector3(0.35f, 0.35f, 0.35f);
+            var followTarget = cameraObject.GetComponent<H3CinemachineFollowTarget>();
+            if (followTarget != null)
+            {
+                var serializedFollowTarget = new SerializedObject(followTarget);
+                var serializedOffset = serializedFollowTarget.FindProperty("followOffset");
+                if (serializedOffset != null)
+                {
+                    serializedOffset.vector3Value = compositionOffset;
+                    serializedFollowTarget.ApplyModifiedPropertiesWithoutUndo();
+                }
+            }
             polish.Configure(cmCamera, follow);
             polish.ConfigureH9(CameraZoom, follow.FollowOffset, follow.TrackerSettings.PositionDamping);
 

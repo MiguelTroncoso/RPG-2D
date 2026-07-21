@@ -12,6 +12,7 @@ H9 mejora la presentación de la demo v0.8.1 Alpha sin añadir mecánicas ni act
 - HUD de estado/misión compacto; `H5MissionHud` queda reservado para prompts contextuales de hablar/equipar.
 - Pausa y opciones reacomodadas para reducir desplazamiento vertical en resoluciones landscape.
 - `H9VerticalSlicePolishBuilder.Validate` comprueba cámara, safe area y escena.
+- El builder sincroniza el offset de composición en el binding H3 y en Cinemachine para que `Awake` no restaure la composición anterior.
 
 ## Validación reproducible
 
@@ -23,8 +24,10 @@ H9 mejora la presentación de la demo v0.8.1 Alpha sin añadir mecánicas ni act
   -logFile /tmp/lumbre-h9-builder.log
 ```
 
-La validación estructural de escena pasa en batchmode. El test dedicado es `H9VerticalSlicePolishPlayModeTests`; debe ejecutarse junto con las regresiones H3–H8 cuando el runner de Unity tenga disponible el .NET SDK requerido por `build-server`.
+La validación estructural de escena pasa en batchmode. El test dedicado es `H9VerticalSlicePolishPlayModeTests`. Para obtener XML no se usa `-quit` junto con `-runTests`; Unity termina al finalizar el Test Framework.
+
+H9.1 verificó dos ciclos Build → Validate con código 0, EditMode 23/23 y PlayMode 9/9. La regresión H9 detectó y corrigió el offset de cámara que `H3CinemachineFollowTarget` sobrescribía en runtime.
 
 ## Android
 
-El build de desarrollo se genera en `/tmp/lumbre-h9-android.apk`. La captura [h9-android-layout-preview.png](captures/h9-android-layout-preview.png) es un render de referencia 1920×1080, no una captura física. Durante esta ejecución no había dispositivo ADB conectado; las capturas y métricas de hardware quedan pendientes de la revisión técnica con un teléfono.
+El build de desarrollo se genera en `/tmp/lumbre-h9-android.apk` con ARM64, OpenGLES3, Development Build, Allow Debugging y ConnectWithProfiler. La captura [h9-android-layout-preview.png](captures/h9-android-layout-preview.png) es un render de referencia 1920×1080, no una captura física. Durante H9.1 `adb devices -l` no detectó un dispositivo; las capturas, arranques y métricas de hardware quedan pendientes. El detalle está en [H9.1 Physical Validation](H9_1_PHYSICAL_VALIDATION.md).

@@ -96,6 +96,7 @@ H9 mantiene la misma frontera y solo refina la presentación existente:
 
 - `H9SafeAreaLayout` contiene la raíz de `PlayerUI` dentro de `Screen.safeArea`; controles, HUD y menús continúan siendo consumidores de los mismos contratos H3–H8.
 - `H9VerticalSlicePolishBuilder` es idempotente y modifica únicamente jerarquía/layout UI, parámetros de Cinemachine, collider de límites visuales y versión de presentación.
+- El builder sincroniza el offset de composición tanto en `CinemachineFollow` como en `H3CinemachineFollowTarget`, evitando que el binding de H3 sobrescriba la configuración H9 durante `Awake`.
 - `H7CameraPolish` conserva el target oficial y aplica composición, amortiguación y zoom sin decidir movimiento ni colisiones.
 - `H7StatusHud` y `H5MissionHud` siguen leyendo estado de combate, misión, inventario y progresión; el segundo solo muestra prompts contextuales y nunca ejecuta reglas.
 - La preparación Android usa `PlayerSettings`/BuildPipeline y una captura física solo se considera válida cuando proviene de un dispositivo conectado, no de una simulación del editor.

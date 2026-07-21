@@ -1,5 +1,25 @@
 # Changelog técnico
 
+## 2026-07-21 — H9.1 validación automatizada y cierre condicionado — v0.8.1 Alpha
+
+### Incluido
+
+- Se corrigió la sincronización del offset vertical H9 entre `H9VerticalSlicePolishBuilder`, `H3CinemachineFollowTarget` y `H7CameraPolish`; el runtime ya no restaura la composición antigua `{y:0}`.
+- El runner documentado de Unity usa `-runTests` sin `-quit`, permitiendo que el Test Framework genere el XML antes de cerrar.
+- Builder H9 ejecutado dos veces y `Validate` ejecutado dos veces sin duplicar Safe Area, confiner, CameraBounds, HUD, botones ni componentes.
+- Se añadió el registro de H9.1 con resultados, rutas XML, APK, bloqueo de hardware y procedimiento pendiente.
+
+### Validación
+
+- EditMode: 23/23 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-editmode-final.qZqdTZ/results.xml`.
+- PlayMode: 9/9 pasados, 0 fallidos, 0 ignorados; incluye regresiones H3, H4, H4B, H5, H6, H7, H8.1, H8 y H9. XML: `/tmp/lumbre-h9-playmode-final.lMz5Vs/results.xml`.
+- APK Android generado correctamente: `/tmp/lumbre-h9-android.apk`, ARM64/OpenGLES3, Development/Debug/Profiler, 1,023,031,188 bytes.
+- `adb devices -l` no detectó dispositivos; no se ejecutaron instalación, arranques, capturas físicas ni métricas de hardware.
+
+### Estado H9.1
+
+**BLOQUEADO:** la evidencia automatizada y el APK están verificados, pero la puerta de aceptación física exige un Android conectado. No se inicia H10 ni se cambia la versión.
+
 ## 2026-07-21 — H9 pulido del vertical slice para Android — v0.8.1 Alpha
 
 ### Incluido
@@ -15,7 +35,7 @@
 ### Validación
 
 - Builder H9 ejecutado en batchmode y validación de escena completada con código de salida 0.
-- El runner automático de Unity no produjo XML en este entorno porque falta el .NET SDK requerido por `build-server`; queda pendiente repetir EditMode/PlayMode con el runtime de pruebas disponible.
+- La primera invocación con `-quit` cerraba Unity antes de terminar el runner; la ejecución correcta se documenta en H9.1 con `-runTests` sin `-quit`.
 - Build Android físico y capturas de dispositivo quedan pendientes: `adb devices -l` no detectó hardware conectado.
 
 ### Límite explícito

@@ -355,3 +355,12 @@
 - **Decisión:** H9 modifica únicamente composición Cinemachine, límites de cámara, safe area, layout de controles, HUD, menús y feedback de selección. `H9VerticalSlicePolishBuilder` conserva el scene graph y los contratos de gameplay H3–H8.
 - **Motivo:** maximiza sensación, claridad y estabilidad Android sin introducir deuda de backend ni nuevos balances antes de la revisión técnica.
 - **Consecuencias:** la validación física, capturas y métricas Android siguen siendo una puerta explícita; no se declara cerrado el rendimiento de hardware sin un dispositivo real.
+
+## DEC-0038 — H9.1 separa evidencia automatizada de aceptación física
+
+- **Fecha:** 2026-07-21
+- **Estado:** aprobada para el cierre condicionado de H9.1
+- **Problema:** el runner iniciado con `-quit` finalizaba Unity antes de escribir el XML y el entorno no tenía un teléfono Android conectado para validar safe area, arranque, controles y rendimiento.
+- **Decisión:** las suites se ejecutan con `-runTests` sin `-quit`; H9.1 registra por separado los XML, el APK y la evidencia física. Si `adb devices -l` está vacío, el resultado es `BLOQUEADO`, no `APROBADO`.
+- **Motivo:** evita confundir una compilación o una prueba de Editor con evidencia de hardware y deja un procedimiento reproducible para la revisión técnica.
+- **Consecuencias:** EditMode 23/23, PlayMode 9/9, builder idempotente y APK están verificados; instalación, arranques, capturas, logcat y métricas quedan pendientes de un dispositivo real. No se inicia H10 ni se cambia la versión.

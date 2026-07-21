@@ -5871,7 +5871,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Camera.H3CinemachineFollowTarget
   target: {fileID: 1265252932}
-  followOffset: {x: 0, y: 0, z: -20}
+  followOffset: {x: 0, y: 0.65, z: -20}
 --- !u!114 &1150227942
 MonoBehaviour:
   m_ObjectHideFlags: 0

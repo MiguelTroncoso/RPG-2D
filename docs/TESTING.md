@@ -336,10 +336,21 @@ Suite automática prevista:
   -runTests -testPlatform playmode \
   -testResults /tmp/lumbre-h9-playmode.xml \
   -testFilter Lumbre.Game.Tests \
-  -quit -logFile /tmp/lumbre-h9-playmode.log
+  -logFile /tmp/lumbre-h9-playmode.log
 ```
 
-Resultado de esta estación: builder y validación estructural terminaron con código 0; Unity 6 no generó XML de EditMode/PlayMode porque su runner intentó invocar `build-server`, ausente en la instalación del editor, incluso con un .NET SDK local aislado. Debe repetirse en una estación con el runner completo antes de declarar las suites H9 en verde. El APK H9 sí terminó correctamente en `/tmp/lumbre-h9-android.apk`.
+No se debe añadir `-quit` a una ejecución `-runTests`: Unity cerraría antes de que el Test Framework guarde el XML. Con el comando anterior, el runner completó correctamente.
+
+Resultado H9.1 de esta estación:
+
+- Builder H9/Validate: cuatro ejecuciones, todas con código 0; dos ciclos Build → Validate.
+- EditMode: 23/23 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-editmode-final.qZqdTZ/results.xml`.
+- PlayMode: 9/9 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/lumbre-h9-playmode-final.lMz5Vs/results.xml`.
+- Las regresiones H3, H4, H4B, H5, H6, H7, H8.1 y H8 están incluidas en PlayMode.
+- APK H9: generado correctamente en `/tmp/lumbre-h9-android.apk`.
+- Validación física, capturas y métricas: bloqueadas porque el ADB incluido en Unity no detectó un dispositivo.
+
+La corrección H9.1 sincroniza el offset de composición serializado del binding H3 con el `CinemachineFollow` H9; no modifica gameplay ni contratos de dominio.
 
 ## Criterio de calidad H4–H8
 

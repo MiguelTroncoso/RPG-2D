@@ -115,3 +115,24 @@ Salida esperada: `/tmp/lumbre-h9-android.apk`. El APK no se versiona por `.gitig
 ## Validación pendiente de hardware H9
 
 El entorno local no tiene un Android conectado: `adb devices -l` solo muestra el encabezado. Por tanto, no se afirma todavía un resultado físico ni se agregan capturas simuladas como si fueran de dispositivo. H9 debe registrar FPS sostenidos, frame time, memoria, draw calls, temperatura, batería y tiempos de carga en al menos un Android de gama media durante 15 minutos. Si aparecen hitches por transparencia, audio, Canvas o partículas, se corrige la presentación antes de ampliar contenido.
+
+## H9.1 — Runner, APK y estado de validación
+
+Para que Unity termine las suites y genere el XML, no se debe pasar `-quit` junto con `-runTests`; el Test Framework cierra el proceso cuando termina:
+
+```bash
+UNITY="/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity"
+PROJECT="/Users/migueltroncoso/Documents/Juego 2D"
+
+"$UNITY" -batchmode -projectPath "$PROJECT" \
+  -runTests -testPlatform editmode \
+  -testResults /tmp/lumbre-h9-editmode.xml \
+  -logFile /tmp/lumbre-h9-editmode.log
+
+"$UNITY" -batchmode -projectPath "$PROJECT" \
+  -runTests -testPlatform playmode \
+  -testResults /tmp/lumbre-h9-playmode.xml \
+  -logFile /tmp/lumbre-h9-playmode.log
+```
+
+El resultado verificado en esta estación fue EditMode 23/23 y PlayMode 9/9. El APK H9 se generó en `/tmp/lumbre-h9-android.apk` con ARM64, OpenGLES3, Development Build, Allow Debugging y ConnectWithProfiler. El ADB incluido en Unity está en `PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb`; actualmente `adb devices -l` devuelve una lista vacía, así que H9.1 permanece bloqueado para instalación, arranques, capturas y métricas físicas.

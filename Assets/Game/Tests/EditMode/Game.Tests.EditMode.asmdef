@@ -1,0 +1,25 @@
+{
+  "name": "Game.Tests.EditMode",
+  "rootNamespace": "Lumbre.Game.Tests",
+  "references": [
+    "Game.Application",
+    "Game.Domain",
+    "Game.Infrastructure.Local"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

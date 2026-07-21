@@ -1,0 +1,22 @@
+{
+  "name": "Game.Editor",
+  "rootNamespace": "Lumbre.Game.Editor",
+  "references": [
+    "Game.Client",
+    "Game.Domain",
+    "Unity.InputSystem",
+    "Unity.Cinemachine",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

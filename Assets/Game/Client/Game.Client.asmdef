@@ -1,0 +1,20 @@
+{
+  "name": "Game.Client",
+  "rootNamespace": "Lumbre.Game",
+  "references": [
+    "Game.Application",
+    "Game.Domain",
+    "Game.Infrastructure.Local",
+    "Unity.InputSystem",
+    "Unity.Cinemachine"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

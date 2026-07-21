@@ -1,0 +1,17 @@
+{
+  "name": "Game.Infrastructure.Local",
+  "rootNamespace": "Lumbre.Game",
+  "references": [
+    "Game.Application",
+    "Game.Domain"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

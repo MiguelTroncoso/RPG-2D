@@ -363,6 +363,35 @@ Resultado H9.2 de esta estación:
 - Build → Validate: dos ciclos completados con código 0, sin duplicar Safe Area, confiner, CameraBounds, HUD, botones ni componentes.
 - Validación física: pendiente; no se consideran estos resultados sustitutos de una prueba en teléfono.
 
+## H10 — locomoción y combate táctil
+
+La ejecución de H10 debe dejar que Unity genere el XML antes de cerrar el proceso; por eso las suites usan `-runTests` sin `-quit`:
+
+```bash
+UNITY="/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity"
+PROJECT="/Users/migueltroncoso/Documents/Juego 2D"
+
+"$UNITY" -batchmode -nographics -projectPath "$PROJECT" \
+  -runTests -testPlatform editmode \
+  -testResults /tmp/h10-editmode.xml \
+  -logFile /tmp/h10-editmode.log
+
+"$UNITY" -batchmode -nographics -projectPath "$PROJECT" \
+  -runTests -testPlatform playmode \
+  -testResults /tmp/h10-playmode.xml \
+  -logFile /tmp/h10-playmode.log
+```
+
+Resultado reproducible de H10:
+
+- EditMode: 27/27 pasados, 0 fallidos, 0 ignorados; XML `/tmp/h10-editmode-1.xml`; código de salida 0.
+- PlayMode: 35/35 pasados, 0 fallidos, 0 ignorados; XML `/tmp/h10-playmode-1.xml`; código de salida 0.
+- PlayMode incluye 24 pruebas H10 y las regresiones H3, H4, H4B, H5, H6, H7, H8.1, H8 y H9.
+- H10 cubre cardinales, diagonales, límite de velocidad, desaceleración, dirección estable, colisiones, bindings táctiles, feedback, ATK, DEF, AOE, pausa, reanudación, interacción/equipamiento, enemigos, Bootstrap y safe area.
+- El builder H10 ejecutó ciclos repetidos `Build` → `Validate` con código de salida 0 y sin duplicar elementos.
+
+La validación física queda separada de las pruebas automáticas: instalación del APK, layout real, pulsaciones en pantalla, logcat, Unity Profiler, FPS, memoria, temperatura y batería requieren un Android conectado. No se debe declarar H10 aprobado únicamente por el XML o por la existencia del APK.
+
 ## Criterio de calidad H4–H8
 
 - cero errores de compilación;

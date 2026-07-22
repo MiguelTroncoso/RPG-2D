@@ -1,5 +1,34 @@
 # Changelog técnico
 
+## 2026-07-21 — H10 control del jugador, locomoción y combate táctil — v0.8.1 Alpha
+
+### Incluido
+
+- Causa raíz corregida: las acciones táctiles se muestreaban únicamente con `WasPressedThisFrame`, mientras `OnScreenButton` entrega el estado mediante un dispositivo virtual en el siguiente update; además no existía una frontera común para foco y pausa.
+- `H3PlayerInputReader` ahora mantiene un latch de `InputAction.started`, reinicia los dispositivos virtuales `OnScreen` al perder foco y entrega la misma intención a joystick, teclado, mouse/gamepad y touch.
+- `MovementIntent`, `PlayerLocomotionModel` y `LocomotionVelocity` separan dead zone, respuesta analógica, aceleración, desaceleración, normalización diagonal y límite de velocidad fuera de `MonoBehaviour`.
+- El jugador conserva una dirección de mirada estable y el movimiento sigue usando `Rigidbody2D` continuo, colisiones existentes y respawn H3.
+- `PlayerActionStateModel` y `H10PlayerActionStateController` bloquean acciones incompatibles durante pausa, muerte o transición de acción sin mover reglas de combate al cliente de presentación.
+- ATK, DEF, AOE, interacción y equipamiento usan los mismos contratos para touch y QA; los botones H10 agregan únicamente feedback visual de pulsación.
+- La selección de ataque mantiene continuidad temporal del objetivo durante una cadencia corta para evitar retargeting accidental causado por el movimiento del enemigo, sin crear un lock persistente.
+- Se agregaron 4 pruebas EditMode y 24 pruebas PlayMode de locomoción, dirección, colisión, botones, acciones, pausa, safe area, bootstrap y regresiones H3–H9.
+
+### Validación
+
+- EditMode: 27/27 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/h10-editmode-1.xml`.
+- PlayMode: 35/35 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/h10-playmode-1.xml`.
+- `H10PlayerControlBuilder.Build` y `Validate` ejecutados en ciclos repetidos con código de salida 0; no se duplicaron componentes, controles ni objetos de escena.
+- APK generado con ARM64, OpenGLES3, landscape, Development Build, Allow Debugging y ConnectWithProfiler: `Builds/Android/LumbreDeNacar-v0.8.1-H10.apk`, 76,139,085 bytes, SHA-256 `a78cf8d9aaefc9703032860023cc690cea19ddeceb641640125a3e236ff3004f`.
+- No se realizó todavía instalación ni validación en teléfono físico; ADB/logcat/Profiler y las métricas de hardware permanecen pendientes.
+
+### Estado H10
+
+**IMPLEMENTADO CON OBSERVACIONES:** la cobertura automática y el APK están verificados, pero H10 no se declara aprobado hasta completar la validación física Android. Se mantiene `v0.8.1 Alpha` y no se inicia H11.
+
+### Límite explícito
+
+H10 no añade enemigos, mapas, NPC, misiones, habilidades, economía, loot, crafting, networking, servidor, multiplayer, nuevas reglas de daño, progresión, inventario, equipamiento, persistencia, guardado ni balance. Mantiene los contratos H3–H9.
+
 ## 2026-07-21 — H9.2 corrección de layout Android — v0.8.1 Alpha
 
 ### Incluido

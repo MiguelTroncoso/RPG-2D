@@ -6,7 +6,8 @@ namespace Lumbre.Game.Domain.Combat
         Cooldown = 1,
         InsufficientHeat = 2,
         AlreadyActive = 3,
-        NotReady = 4
+        NotReady = 4,
+        InvalidState = 5
     }
 
     public readonly struct AbilityResult

@@ -148,3 +148,26 @@ Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk
 El layout se valida en 1920×1080, 2400×1080, 2340×1080, 2560×1080 y 1280×720. El joystick mantiene un área táctil amplia mientras su representación visual ocupa menos espacio; los controles superiores se anclan a la safe area y el HUD se resuelve después del arranque de la escena.
 
 El APK y cualquier carpeta `Builds/` quedan excluidos por `.gitignore`; no se suben al repositorio. Un APK generado correctamente no sustituye la prueba física: instalación, arranques, capturas y métricas Android siguen pendientes de un dispositivo conectado.
+
+## H10 — locomoción y combate táctil
+
+H10 mantiene la ejecución horizontal y prepara un APK Development ARM64 con OpenGLES3, Allow Debugging y ConnectWithProfiler. `H10PlayerControlBuilder.BuildAndroidDevelopment` ejecuta primero el builder idempotente de H10 y restaura las APIs gráficas y arquitecturas originales al terminar:
+
+```bash
+UNITY="/Applications/Unity/Hub/Editor/6000.3.20f1/Unity.app/Contents/MacOS/Unity"
+PROJECT="/Users/migueltroncoso/Documents/Juego 2D"
+
+"$UNITY" -batchmode -nographics -quit -projectPath "$PROJECT" \
+  -executeMethod Lumbre.Game.Editor.H10PlayerControlBuilder.BuildAndroidDevelopment \
+  -logFile /tmp/h10-android-build.log
+```
+
+Salida verificada en esta estación:
+
+```text
+Builds/Android/LumbreDeNacar-v0.8.1-H10.apk
+76,139,085 bytes
+SHA-256: a78cf8d9aaefc9703032860023cc690cea19ddeceb641640125a3e236ff3004f
+```
+
+La escena incluye Bootstrap y VerticalSlice habilitadas, el Input System unificado y Cinemachine oficial. El APK queda ignorado por `.gitignore` y no se publica en GitHub. Todavía falta instalarlo en un Android físico para validar joystick, ATK, DEF, AOE, safe area, cámara, pausa, interacción, equipamiento, arranques y métricas; un build correcto no se presenta como validación de hardware.

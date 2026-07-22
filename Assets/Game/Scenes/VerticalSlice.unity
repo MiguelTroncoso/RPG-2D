@@ -2475,6 +2475,7 @@ GameObject:
   - component: {fileID: 534295654}
   - component: {fileID: 534295653}
   - component: {fileID: 534295652}
+  - component: {fileID: 534295655}
   m_Layer: 13
   m_Name: H4B_AreaButton
   m_TagString: Untagged
@@ -2553,6 +2554,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534295650}
   m_CullTransparentMesh: 1
+--- !u!114 &534295655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534295650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e2e8d751bdb4bbb8f673991cd18b3f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Presentation.H10TouchButtonFeedback
+  pressedAlpha: 1
+  pressedScale: 0.94
 --- !u!1 &539060210
 GameObject:
   m_ObjectHideFlags: 0
@@ -4189,6 +4204,7 @@ GameObject:
   - component: {fileID: 897300068}
   - component: {fileID: 897300067}
   - component: {fileID: 897300066}
+  - component: {fileID: 897300069}
   m_Layer: 13
   m_Name: H5_EquipButton
   m_TagString: Untagged
@@ -4267,6 +4283,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 897300064}
   m_CullTransparentMesh: 1
+--- !u!114 &897300069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 897300064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e2e8d751bdb4bbb8f673991cd18b3f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Presentation.H10TouchButtonFeedback
+  pressedAlpha: 1
+  pressedScale: 0.94
 --- !u!1 &901853311
 GameObject:
   m_ObjectHideFlags: 0
@@ -4705,6 +4735,7 @@ GameObject:
   - component: {fileID: 957413818}
   - component: {fileID: 957413817}
   - component: {fileID: 957413816}
+  - component: {fileID: 957413819}
   m_Layer: 13
   m_Name: H5_InteractButton
   m_TagString: Untagged
@@ -4783,6 +4814,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 957413814}
   m_CullTransparentMesh: 1
+--- !u!114 &957413819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 957413814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e2e8d751bdb4bbb8f673991cd18b3f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Presentation.H10TouchButtonFeedback
+  pressedAlpha: 1
+  pressedScale: 0.94
 --- !u!1 &1014234768
 GameObject:
   m_ObjectHideFlags: 0
@@ -6549,6 +6594,7 @@ GameObject:
   - component: {fileID: 1265252939}
   - component: {fileID: 1265252941}
   - component: {fileID: 1265252940}
+  - component: {fileID: 1265252942}
   m_Layer: 10
   m_Name: Player_Avatar
   m_TagString: Player
@@ -6571,6 +6617,10 @@ MonoBehaviour:
   inputReader: {fileID: 1265252929}
   respawnPoint: {fileID: 1469631351}
   movementSpeed: 2.4
+  acceleration: 64
+  deceleration: 128
+  inputDeadZone: 0.12
+  analogResponse: 1
   outOfBoundsMargin: 1.5
 --- !u!114 &1265252929
 MonoBehaviour:
@@ -6830,6 +6880,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1265252942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1265252927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757799146675b451e8fbebddd2987ca1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Player.H10PlayerActionStateController
 --- !u!1 &1277342446
 GameObject:
   m_ObjectHideFlags: 0
@@ -7197,6 +7259,7 @@ GameObject:
   - component: {fileID: 1396214341}
   - component: {fileID: 1396214340}
   - component: {fileID: 1396214339}
+  - component: {fileID: 1396214342}
   m_Layer: 13
   m_Name: H4_AttackButton
   m_TagString: Untagged
@@ -7275,6 +7338,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1396214337}
   m_CullTransparentMesh: 1
+--- !u!114 &1396214342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396214337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e2e8d751bdb4bbb8f673991cd18b3f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Presentation.H10TouchButtonFeedback
+  pressedAlpha: 1
+  pressedScale: 0.94
 --- !u!1 &1419988432
 GameObject:
   m_ObjectHideFlags: 0
@@ -7287,6 +7364,7 @@ GameObject:
   - component: {fileID: 1419988436}
   - component: {fileID: 1419988435}
   - component: {fileID: 1419988434}
+  - component: {fileID: 1419988437}
   m_Layer: 13
   m_Name: H4B_DefenseButton
   m_TagString: Untagged
@@ -7365,6 +7443,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1419988432}
   m_CullTransparentMesh: 1
+--- !u!114 &1419988437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1419988432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e2e8d751bdb4bbb8f673991cd18b3f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.Presentation.H10TouchButtonFeedback
+  pressedAlpha: 1
+  pressedScale: 0.94
 --- !u!1 &1439324582
 GameObject:
   m_ObjectHideFlags: 0
@@ -9102,7 +9194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c8af9de58ac44e1a257606d9665106, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.GameSceneMarker
-  marker: H9VerticalSlicePolish
+  marker: H10PlayerControlAndTouchCombat
 --- !u!4 &1718546561
 Transform:
   m_ObjectHideFlags: 0

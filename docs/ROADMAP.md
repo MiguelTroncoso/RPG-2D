@@ -1,6 +1,6 @@
 # Lumbre de Nácar — Roadmap por hitos verificables
 
-> Versión: 1.8 · Estado: H9 — APROBADO CON OBSERVACIONES; evidencia física manual incorporada · Fecha: 2026-07-21
+> Versión: 1.9 · Estado: H10 — IMPLEMENTADO CON OBSERVACIONES; validación física Android pendiente · Fecha: 2026-07-21
 
 Este roadmap separa la primera demo de la producción online. Cada hito tiene un resultado pequeño y un criterio de salida. H0 y el vertical slice reducido están aprobados; H1 está autorizado con Unity 6.3 LTS, Input System multiplataforma y Cinemachine.
 
@@ -26,7 +26,7 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 | H9 — Vertical Slice Polish | Cámara, UX móvil, HUD, menús y preparación Android | Media | H8.1 |
 | H9.1 — Validación física y regresiones | Tests completos, APK, dispositivo Android, capturas y métricas | Alta | H9 |
 | H9.2 — Corrección de layout Android | Safe area, viewport, HUD, joystick, prompts y spawns | Media | H9.1 |
-| H10 — Demo candidata | Corrección de bugs y prueba con persona externa | Media | H9.2 |
+| H10 — Control, locomoción y combate táctil | Input unificado, movimiento 8-direcciones, acciones táctiles y regresiones | Alta | H9.2 |
 
 ### H0 — Aprobación de alcance
 
@@ -138,11 +138,13 @@ Un hito no se considera terminado porque exista una escena o una clase. Debe pod
 
 **Resultado:** correcciones implementadas y verificadas automáticamente con dos ciclos Build → Validate, EditMode 23/23, PlayMode 11/11 y APK ARM64/OpenGLES3 generado en `Builds/Android/LumbreDeNacar-v0.8.1-H9.2.apk`. El APK fue instalado manualmente y seis capturas físicas confirman safe area, HUD, cámara y controles. H9 queda **APROBADO CON OBSERVACIONES**; ADB, logcat y Unity Profiler siguen pendientes. No se cambia gameplay, versión ni se inicia H10.
 
-### H10 — Demo candidata
+### H10 — Control del jugador, locomoción y combate táctil
 
-**Entregables:** build reproducible, checklist de aceptación, registro de bugs, instrucciones de prueba y changelog.
+**Entregables:** locomoción 8-direcciones basada en intención; aceleración, desaceleración, dead zone, respuesta analógica y normalización diagonal en dominio; dirección estable; ATK/DEF/AOE/interacción/equipamiento conectados a touch, teclado y gamepad; frontera de estado para pausa/muerte; builder idempotente; pruebas EditMode/PlayMode; APK Android reproducible y documentación de validación.
 
-**Criterio de salida:** se cumplen todos los criterios de `CRITICAL_REVIEW.md`, ningún bug bloquea el recorrido y el responsable del producto aprueba pasar a la siguiente decisión.
+**Criterio de salida:** el jugador se desplaza en las cuatro direcciones y diagonales sin superar la velocidad máxima, se detiene de forma predecible, conserva la dirección de mirada, respeta colisiones y puede volver al respawn; una pulsación táctil produce una sola acción; ATK causa daño, DEF reduce daño durante su ventana, AOE respeta Calor/radio/cooldown, pausa bloquea acciones y reanudar las restaura; Bootstrap, safe area, interacción, equipamiento y regresiones H3–H9 permanecen en verde.
+
+**Resultado técnico:** `H10PlayerControlBuilder` se ejecutó de forma idempotente y `Validate` terminó con código 0. EditMode pasó 27/27 y PlayMode 35/35. El APK `Builds/Android/LumbreDeNacar-v0.8.1-H10.apk` se generó con ARM64/OpenGLES3 y Development/Debug/Profiler. La validación física Android, instalación, logcat, Profiler y métricas de hardware siguen pendientes; H10 queda **IMPLEMENTADO CON OBSERVACIONES**. Se mantiene v0.8.1 Alpha y no se inicia H11.
 
 ## Puerta posterior a la demo
 

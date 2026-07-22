@@ -1,5 +1,6 @@
 using System;
 using Lumbre.Game.Domain.Combat;
+using Lumbre.Game.Domain.Movement;
 using Lumbre.Game.Client.Player;
 using UnityEngine;
 
@@ -12,6 +13,11 @@ namespace Lumbre.Game.Client.Combat
         [SerializeField] private H4CombatHealth health;
         [SerializeField] private LayerMask targetLayers;
         [SerializeField, Min(0.1f)] private float attackRange = 1.45f;
+
+        private H10PlayerActionStateController actionState;
+        private H4CombatHealth recentAttackTarget;
+        private float recentAttackTargetAt = float.NegativeInfinity;
+        private const float RecentTargetContinuitySeconds = 0.75f;
 
         public AttackResult LastAttackResult { get; private set; }
         public float AttackRange => attackRange;
@@ -32,19 +38,43 @@ namespace Lumbre.Game.Client.Combat
             inputReader ??= GetComponent<H3PlayerInputReader>();
             attacker ??= GetComponent<H4BasicAttacker>();
             health ??= GetComponent<H4CombatHealth>();
+            actionState ??= GetComponent<H10PlayerActionStateController>();
         }
 
         private void Update()
         {
             if (inputReader != null && inputReader.AttackPressedThisFrame)
             {
-                TryBasicAttack();
+                TryBasicAttackFromInput();
             }
         }
 
         public AttackResult TryBasicAttack()
         {
-            if (health != null && !health.IsAlive)
+            return TryBasicAttackCore();
+        }
+
+        private AttackResult TryBasicAttackFromInput()
+        {
+            if (actionState != null && !actionState.TryBegin(PlayerActionState.Attacking))
+            {
+                LastAttackResult = AttackResult.Failure(AttackResultCode.InvalidTarget);
+                return LastAttackResult;
+            }
+
+            try
+            {
+                return TryBasicAttackCore();
+            }
+            finally
+            {
+                actionState?.Complete(PlayerActionState.Attacking);
+            }
+        }
+
+        private AttackResult TryBasicAttackCore()
+        {
+            if (Time.timeScale <= 0f || health != null && !health.IsAlive)
             {
                 LastAttackResult = AttackResult.Failure(AttackResultCode.InvalidTarget);
                 return LastAttackResult;
@@ -60,6 +90,8 @@ namespace Lumbre.Game.Client.Combat
             LastAttackResult = attacker.TryAttack(target, Time.time);
             if (LastAttackResult.Succeeded)
             {
+                recentAttackTarget = target as H4CombatHealth;
+                recentAttackTargetAt = Time.time;
                 GetComponent<H4CombatFeedback>()?.PlayAttack();
                 BasicAttackSucceeded?.Invoke(LastAttackResult);
             }
@@ -69,26 +101,49 @@ namespace Lumbre.Game.Client.Combat
 
         private ITargetable FindNearestTarget()
         {
+            if (recentAttackTarget != null && recentAttackTarget.IsAlive && recentAttackTarget.IsTargetable
+                && Time.time - recentAttackTargetAt <= RecentTargetContinuitySeconds
+                && Vector2.Distance(transform.position, recentAttackTarget.transform.position) <= attackRange)
+            {
+                return recentAttackTarget;
+            }
+
             var colliders = Physics2D.OverlapCircleAll(transform.position, attackRange, targetLayers);
-            ITargetable nearest = null;
-            var nearestDistance = float.PositiveInfinity;
+            ITargetable nearestFacing = null;
+            ITargetable nearestFallback = null;
+            var nearestFacingDistance = float.PositiveInfinity;
+            var nearestFallbackDistance = float.PositiveInfinity;
+            var direction = GetComponent<H3PlayerController>()?.CurrentLookDirection
+                ?? Vector2.right;
             foreach (var collider in colliders)
             {
                 var target = collider.GetComponentInParent<H4CombatHealth>();
-                if (target == null || !target.IsTargetable)
+                if (target == null || target == health || !target.IsTargetable)
                 {
                     continue;
                 }
 
                 var distance = Vector2.Distance(transform.position, target.transform.position);
-                if (distance < nearestDistance)
+                var toTarget = (Vector2)target.transform.position - (Vector2)transform.position;
+                var isFacing = direction.sqrMagnitude <= 0.0001f || toTarget.sqrMagnitude <= 0.0001f
+                    || Vector2.Dot(direction.normalized, toTarget.normalized) >= 0.05f;
+                if (distance < nearestFallbackDistance)
                 {
-                    nearest = target;
-                    nearestDistance = distance;
+                    nearestFallback = target;
+                    nearestFallbackDistance = distance;
+                }
+
+                if (isFacing && distance < nearestFacingDistance)
+                {
+                    nearestFacing = target;
+                    nearestFacingDistance = distance;
                 }
             }
 
-            return nearest;
+            // Prefer the current look direction. If no target is in the
+            // facing cone, retain the previous nearest-target behavior so
+            // H3-H9 mission and combat flows remain compatible.
+            return nearestFacing ?? nearestFallback;
         }
 
         private void OnDrawGizmosSelected()

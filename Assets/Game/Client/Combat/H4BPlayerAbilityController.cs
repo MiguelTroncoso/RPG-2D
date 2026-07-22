@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Lumbre.Game.Client.Player;
 using Lumbre.Game.Domain.Combat;
 using Lumbre.Game.Domain.Constants;
+using Lumbre.Game.Domain.Movement;
 using UnityEngine;
 
 namespace Lumbre.Game.Client.Combat
@@ -30,6 +31,7 @@ namespace Lumbre.Game.Client.Combat
         private HeatResourceModel _heat;
         private DefenseAbilityModel _defense;
         private AreaAttackAbilityModel _areaAttack;
+        private H10PlayerActionStateController _actionState;
 
         public int CurrentHeat => _heat?.CurrentHeat ?? Mathf.Clamp(initialHeat, 0, MaxHeat);
         public int MaxHeat => Mathf.Max(1, maxHeat);
@@ -70,6 +72,7 @@ namespace Lumbre.Game.Client.Combat
             combatController ??= GetComponent<H4PlayerCombatController>();
             health ??= GetComponent<H4CombatHealth>();
             feedback ??= GetComponent<H4BAbilityFeedback>();
+            _actionState = GetComponent<H10PlayerActionStateController>();
             InitializeModels(_timeSource ?? new UnityCombatTimeSource());
         }
 
@@ -99,25 +102,55 @@ namespace Lumbre.Game.Client.Combat
 
         private void Update()
         {
-            if (inputReader == null || health != null && !health.IsAlive)
+            if (inputReader == null || Time.timeScale <= 0f || health != null && !health.IsAlive)
             {
                 return;
             }
 
             if (inputReader.DefensePressedThisFrame)
             {
-                TryActivateDefense();
+                TryActivateDefenseFromInput();
+                return;
             }
 
             if (inputReader.AreaAttackPressedThisFrame)
             {
-                TryAreaAttack();
+                TryAreaAttackFromInput();
             }
         }
 
         public AbilityResult TryActivateDefense()
         {
+            return TryActivateDefenseCore();
+        }
+
+        private void TryActivateDefenseFromInput()
+        {
+            if (_actionState != null && !_actionState.TryBegin(PlayerActionState.Defending))
+            {
+                return;
+            }
+
+            try
+            {
+                TryActivateDefenseCore();
+            }
+            finally
+            {
+                _actionState?.Complete(PlayerActionState.Defending);
+            }
+        }
+
+        private AbilityResult TryActivateDefenseCore()
+        {
             InitializeModelsIfNeeded();
+            if (Time.timeScale <= 0f || health != null && !health.IsAlive)
+            {
+                var blocked = AbilityResult.Failure(AbilityResultCode.InvalidState);
+                feedback?.PlayRejected(blocked.Code);
+                return blocked;
+            }
+
             var result = _defense.TryActivate();
             if (result.Succeeded)
             {
@@ -134,7 +167,36 @@ namespace Lumbre.Game.Client.Combat
 
         public AbilityResult TryAreaAttack()
         {
+            return TryAreaAttackCore();
+        }
+
+        private void TryAreaAttackFromInput()
+        {
+            if (_actionState != null && !_actionState.TryBegin(PlayerActionState.AreaAttack))
+            {
+                return;
+            }
+
+            try
+            {
+                TryAreaAttackCore();
+            }
+            finally
+            {
+                _actionState?.Complete(PlayerActionState.AreaAttack);
+            }
+        }
+
+        private AbilityResult TryAreaAttackCore()
+        {
             InitializeModelsIfNeeded();
+            if (Time.timeScale <= 0f || health != null && !health.IsAlive)
+            {
+                var blocked = AbilityResult.Failure(AbilityResultCode.InvalidState);
+                feedback?.PlayRejected(blocked.Code);
+                return blocked;
+            }
+
             var result = _areaAttack.TryActivate();
             if (!result.Succeeded)
             {

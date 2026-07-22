@@ -373,3 +373,12 @@
 - **Decisión:** corregir safe area, viewport, inicialización del HUD, densidad de paneles, representación visual del joystick y texto de interacción. El área táctil permanece amplia, se reutiliza el esquema `Touch` existente y los spawns se validan dentro del volumen jugable.
 - **Motivo:** resuelve defectos de presentación verificables sin modificar combate, IA, misión, progresión, inventario, persistencia, contratos de dominio ni arquitectura offline→online.
 - **Consecuencias:** la matriz automática cubre cinco resoluciones landscape y la prueba física H9.1/H9.2 sigue siendo obligatoria; no se presentan capturas o métricas de teléfono mientras ADB no detecte hardware.
+
+## DEC-0040 — H10 unifica input y mantiene la simulación fuera del MonoBehaviour
+
+- **Fecha:** 2026-07-21
+- **Estado:** aprobada durante H10
+- **Problema:** el input de touch podía perder pulsaciones cuando `OnScreenButton` actualizaba su dispositivo virtual después del muestreo de los controladores; movimiento y acciones tampoco compartían una política única para foco, pausa y muerte.
+- **Decisión:** capturar `InputAction.started` en `H3PlayerInputReader`, reutilizar el mismo mapa para touch/teclado/gamepad, reiniciar dispositivos virtuales al perder foco y centralizar la puerta de estado en `PlayerActionStateModel`. Mantener locomoción, intención, velocidad y reglas temporales fuera de `MonoBehaviour`.
+- **Motivo:** hace determinista el borde Android sin reescribir H3–H9 y permite que un cliente remoto futuro valide intenciones con los mismos contratos.
+- **Consecuencias:** H10 añade complejidad acotada de adaptación y tests, pero no crea networking, autoridad local paralela, target lock persistente ni modifica daño, cooldown, Calor, misión, progresión, inventario o persistencia. La aceptación física del APK sigue pendiente.

@@ -103,6 +103,18 @@ H9 mantiene la misma frontera y solo refina la presentación existente:
 
 No se añaden sistemas de servidor, networking, economía, drops, misiones, habilidades ni nuevos actores. La migración offline → online definida arriba permanece intacta.
 
+## Control del jugador y combate táctil H10
+
+H10 conserva la separación de capas y añade solo adaptadores del cliente:
+
+- `H3PlayerInputReader` es la única puerta de entrada para movimiento y acciones. `InputAction.started` captura una pulsación en un latch común; joystick virtual, teclado, mouse y gamepad siguen el mismo `InputActionMap`.
+- `MovementIntent`, `PlayerLocomotionModel` y `LocomotionVelocity` viven fuera de Unity. La capa cliente convierte la intención lógica a la base isométrica, aplica el movimiento mediante `Rigidbody2D` y conserva la dirección de mirada para la presentación/ataque.
+- `PlayerActionStateModel` y `H10PlayerActionStateController` son una frontera de compatibilidad para `Idle`, `Moving`, `Attacking`, `Defending`, `AreaAttack`, `Interacting`, `Paused` y `Dead`. No contienen daño, cooldown, Calor, misión ni progresión.
+- `H4PlayerCombatController`, `H4BPlayerAbilityController` y `H5PlayerMissionController` consumen esa frontera sin mover sus reglas puras. El feedback táctil (`H10TouchButtonFeedback`) solo presenta pulsación; no ejecuta gameplay.
+- Al perder foco, el lector limpia los latches y reinicia únicamente dispositivos virtuales `OnScreen`, evitando acciones pegadas después de suspender Android.
+
+La causa raíz de H10 fue el muestreo directo de `WasPressedThisFrame` en varios controladores, que podía perder la transición entregada por `OnScreenButton` en el siguiente update y no compartía la política de pausa/foco. El latch por acción y la puerta de estado corrigen ese borde sin introducir una autoridad paralela. La simulación sigue local/offline; una futura sesión autoritativa podrá validar las mismas intenciones y resultados en servidor.
+
 ## Riesgos pendientes
 
 La interfaz de sesión no define aún serialización, autenticación, reconciliación, tick rate ni transporte. Es intencional: esas decisiones pertenecen al spike online posterior a la demo y no deben simularse en H9. Los modelos de combate, habilidades, misión, inventario y progresión son puros y el cliente solo los adapta; una futura sesión autoritativa deberá recalcular Calor, cooldown, duración, daño, salud, muerte, progreso, XP, nivel, entrega y equipamiento en servidor. El save local y las preferencias H8 quedan como formatos locales de transición controlada, no como autoridad online.

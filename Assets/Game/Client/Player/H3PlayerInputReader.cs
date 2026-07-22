@@ -2,6 +2,7 @@ using System;
 using Lumbre.Game.Domain.Movement;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 
 namespace Lumbre.Game.Client.Player
 {
@@ -24,6 +25,13 @@ namespace Lumbre.Game.Client.Player
         private InputAction _interactAction;
         private InputAction _equipAction;
         private bool _ownsFallbackMap;
+        private bool _callbacksBound;
+        private bool _attackPressedThisFrame;
+        private bool _defensePressedThisFrame;
+        private bool _areaAttackPressedThisFrame;
+        private bool _interactPressedThisFrame;
+        private bool _equipPressedThisFrame;
+        private bool _hasFocus = true;
 
         public InputActionAsset ActionsAsset
         {
@@ -69,12 +77,16 @@ namespace Lumbre.Game.Client.Player
         private void OnEnable()
         {
             ConfigureAction();
+            BindButtonCallbacks();
             _actionMap?.Enable();
+            _hasFocus = true;
         }
 
         private void OnDisable()
         {
+            UnbindButtonCallbacks();
             _actionMap?.Disable();
+            ClearLatchedActions();
         }
 
         private void OnDestroy()
@@ -87,25 +99,110 @@ namespace Lumbre.Game.Client.Player
 
         public MovementIntent ReadIntent()
         {
-            if (_moveAction == null)
+            return ReadIntent(0.1f, 1f);
+        }
+
+        public MovementIntent ReadIntent(float deadZone, float responseExponent)
+        {
+            if (_moveAction == null || !_hasFocus || Time.timeScale <= 0f)
             {
                 return new MovementIntent(0f, 0f);
             }
 
             var value = _moveAction.ReadValue<Vector2>();
-            return new MovementIntent(value.x, value.y);
+            return new MovementIntent(value.x, value.y, deadZone, responseExponent);
         }
 
-        public bool AttackPressedThisFrame => _attackAction != null
-            && _attackAction.WasPressedThisFrame();
-        public bool DefensePressedThisFrame => _defenseAction != null
-            && _defenseAction.WasPressedThisFrame();
-        public bool AreaAttackPressedThisFrame => _areaAttackAction != null
-            && _areaAttackAction.WasPressedThisFrame();
-        public bool InteractPressedThisFrame => _interactAction != null
-            && _interactAction.WasPressedThisFrame();
-        public bool EquipPressedThisFrame => _equipAction != null
-            && _equipAction.WasPressedThisFrame();
+        /// <summary>
+        /// Button actions are latched from InputAction.started instead of being
+        /// sampled only from a MonoBehaviour Update. This preserves a touch
+        /// press across the OnScreenControl one-frame queue boundary while
+        /// keeping keyboard, gamepad and touch on the same action map.
+        /// </summary>
+        public bool AttackPressedThisFrame => _hasFocus && Time.timeScale > 0f
+            && _attackPressedThisFrame;
+        public bool DefensePressedThisFrame => _hasFocus && Time.timeScale > 0f
+            && _defensePressedThisFrame;
+        public bool AreaAttackPressedThisFrame => _hasFocus && Time.timeScale > 0f
+            && _areaAttackPressedThisFrame;
+        public bool InteractPressedThisFrame => _hasFocus && Time.timeScale > 0f
+            && _interactPressedThisFrame;
+        public bool EquipPressedThisFrame => _hasFocus && Time.timeScale > 0f
+            && _equipPressedThisFrame;
+
+        private void LateUpdate()
+        {
+            ClearLatchedActions();
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            _hasFocus = hasFocus;
+            ClearLatchedActions();
+            if (hasFocus)
+            {
+                return;
+            }
+
+            // OnScreenControl devices are virtual Gamepads. Reset only those
+            // devices so a press held while Android suspends cannot stay stuck,
+            // without touching a physical QA gamepad.
+            foreach (var device in InputSystem.devices)
+            {
+                if (device.usages.Contains(new InternedString("OnScreen")))
+                {
+                    InputSystem.ResetDevice(device);
+                }
+            }
+        }
+
+        private void BindButtonCallbacks()
+        {
+            if (_callbacksBound)
+            {
+                return;
+            }
+
+            _callbacksBound = true;
+            if (_attackAction != null) _attackAction.started += HandleAttackStarted;
+            if (_defenseAction != null) _defenseAction.started += HandleDefenseStarted;
+            if (_areaAttackAction != null) _areaAttackAction.started += HandleAreaAttackStarted;
+            if (_interactAction != null) _interactAction.started += HandleInteractStarted;
+            if (_equipAction != null) _equipAction.started += HandleEquipStarted;
+        }
+
+        private void UnbindButtonCallbacks()
+        {
+            if (!_callbacksBound)
+            {
+                return;
+            }
+
+            _callbacksBound = false;
+            if (_attackAction != null) _attackAction.started -= HandleAttackStarted;
+            if (_defenseAction != null) _defenseAction.started -= HandleDefenseStarted;
+            if (_areaAttackAction != null) _areaAttackAction.started -= HandleAreaAttackStarted;
+            if (_interactAction != null) _interactAction.started -= HandleInteractStarted;
+            if (_equipAction != null) _equipAction.started -= HandleEquipStarted;
+        }
+
+        private void HandleAttackStarted(InputAction.CallbackContext _)
+        {
+            _attackPressedThisFrame = true;
+        }
+        private void HandleDefenseStarted(InputAction.CallbackContext _) => _defensePressedThisFrame = true;
+        private void HandleAreaAttackStarted(InputAction.CallbackContext _) => _areaAttackPressedThisFrame = true;
+        private void HandleInteractStarted(InputAction.CallbackContext _) => _interactPressedThisFrame = true;
+        private void HandleEquipStarted(InputAction.CallbackContext _) => _equipPressedThisFrame = true;
+
+        private void ClearLatchedActions()
+        {
+            _attackPressedThisFrame = false;
+            _defensePressedThisFrame = false;
+            _areaAttackPressedThisFrame = false;
+            _interactPressedThisFrame = false;
+            _equipPressedThisFrame = false;
+        }
 
         private void ConfigureAction()
         {

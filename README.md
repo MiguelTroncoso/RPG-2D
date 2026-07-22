@@ -2,7 +2,7 @@
 
 Documento de orientación inicial para un MMORPG 2D isométrico, original y orientado primero a Android.
 
-> Estado: v0.8.1 Alpha · H9.2 — correcciones automatizadas de layout Android; validación física pendiente. H0–H8.1 estables.
+> Estado: v0.8.1 Alpha · H10 — locomoción y combate táctil implementados; validación física Android pendiente. H0–H9.2 estables.
 
 ## Resumen
 
@@ -48,11 +48,12 @@ La propuesta no intenta ganar por tamaño desde el primer día. El objetivo inic
 - [H9 vertical slice polish](docs/H9_VERTICAL_SLICE_POLISH.md): cámara, safe area, controles, HUD, menús y validación Android.
 - [H9.1 physical validation](docs/H9_1_PHYSICAL_VALIDATION.md): regresiones, builder, APK y estado de la validación física.
 - [H9.2 Android layout fix](docs/H9_2_ANDROID_LAYOUT_FIX.md): correcciones de safe area, viewport, HUD, joystick y prompts táctiles.
+- [H10 player control and touch combat](docs/H10_PLAYER_CONTROL_AND_COMBAT.md): locomoción 8-direcciones, input unificado, acciones táctiles y regresiones.
 
 ## Qué no se implementa todavía
 
-H9 conserva la optimización de presentación y pule exclusivamente la experiencia del vertical slice: cámara, safe area, controles, HUD, menús, feedback y preparación Android. Todavía no implementa crafting, tienda, economía, monedas, profesiones, atributos avanzados, más niveles, varias partidas, nube, cuentas, login, backend online, networking, servidor, multiplayer ni arte final de producción. El slice actual permite recorrer el mundo, completar la misión de Nara, alcanzar nivel 2, equipar la recompensa, recargar el progreso local y configurar la experiencia sin cambiar las reglas de H3–H8.
+H10 conserva el alcance del vertical slice y conecta la locomoción 8-direcciones y el combate existente con joystick, touch y teclado/gamepad de QA. Todavía no implementa crafting, tienda, economía, monedas, profesiones, atributos avanzados, más niveles, varias partidas, nube, cuentas, login, backend online, networking, servidor, multiplayer, nuevos enemigos, mapas, misiones, habilidades ni arte final de producción. La validación física Android del APK H10 queda pendiente; no se inicia H11.
 
 ## Próximo paso propuesto
 
-La siguiente acción es conectar un Android de referencia para validar físicamente H9.1/H9.2 y luego realizar la revisión técnica del repositorio. El objetivo de versión posterior es v0.9.0 Alpha; no se inicia H10 ni se añaden sistemas nuevos antes de esa revisión.
+La siguiente acción es instalar el APK H10 en un Android de referencia y validar físicamente controles, cámara, HUD, pausa y combate. Después corresponde la revisión técnica del repositorio; no se inicia H11 ni se cambia la versión v0.8.1 Alpha antes de esa revisión.

@@ -14,9 +14,9 @@ namespace Lumbre.Game.Client.Combat
         [SerializeField] private LayerMask targetLayers;
         [SerializeField, Min(0.1f)] private float attackRange = 1.45f;
 
-        private H10PlayerActionStateController actionState;
-        private H4CombatHealth recentAttackTarget;
-        private float recentAttackTargetAt = float.NegativeInfinity;
+        [NonSerialized] private H10PlayerActionStateController actionState;
+        [NonSerialized] private H4CombatHealth recentAttackTarget;
+        [NonSerialized] private float recentAttackTargetAt = float.NegativeInfinity;
         private const float RecentTargetContinuitySeconds = 0.75f;
 
         public AttackResult LastAttackResult { get; private set; }

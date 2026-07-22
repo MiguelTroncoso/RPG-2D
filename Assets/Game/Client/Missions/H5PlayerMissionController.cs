@@ -11,7 +11,7 @@ namespace Lumbre.Game.Client.Missions
         [SerializeField] private H3PlayerInputReader inputReader;
         [SerializeField] private H5MissionRuntime runtime;
         [SerializeField] private H5NaraController nara;
-        private H10PlayerActionStateController actionState;
+        [System.NonSerialized] private H10PlayerActionStateController actionState;
 
         public MissionOperationResult LastInteractionResult { get; private set; }
         public EquipmentOperationResult LastEquipmentResult { get; private set; }

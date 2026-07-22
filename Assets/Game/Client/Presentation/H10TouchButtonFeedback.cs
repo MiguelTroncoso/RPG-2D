@@ -15,9 +15,9 @@ namespace Lumbre.Game.Client.Presentation
         [SerializeField, Range(0f, 1f)] private float pressedAlpha = 1f;
         [SerializeField, Range(0.8f, 1f)] private float pressedScale = 0.94f;
 
-        private Image _image;
-        private Color _normalColor;
-        private Vector3 _normalScale;
+        [System.NonSerialized] private Image _image;
+        [System.NonSerialized] private Color _normalColor;
+        [System.NonSerialized] private Vector3 _normalScale;
 
         public bool IsPressed { get; private set; }
 

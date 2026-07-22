@@ -10,8 +10,8 @@ namespace Lumbre.Game.Client.Player
     /// </summary>
     public sealed class H10PlayerActionStateController : MonoBehaviour
     {
-        private PlayerActionStateModel _model;
-        private H4CombatHealth _health;
+        [System.NonSerialized] private PlayerActionStateModel _model;
+        [System.NonSerialized] private H4CombatHealth _health;
 
         public PlayerActionState CurrentState => _model?.Current ?? PlayerActionState.Idle;
 

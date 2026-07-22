@@ -25,13 +25,13 @@ namespace Lumbre.Game.Client.Player
         private InputAction _interactAction;
         private InputAction _equipAction;
         private bool _ownsFallbackMap;
-        private bool _callbacksBound;
-        private bool _attackPressedThisFrame;
-        private bool _defensePressedThisFrame;
-        private bool _areaAttackPressedThisFrame;
-        private bool _interactPressedThisFrame;
-        private bool _equipPressedThisFrame;
-        private bool _hasFocus = true;
+        [System.NonSerialized] private bool _callbacksBound;
+        [System.NonSerialized] private bool _attackPressedThisFrame;
+        [System.NonSerialized] private bool _defensePressedThisFrame;
+        [System.NonSerialized] private bool _areaAttackPressedThisFrame;
+        [System.NonSerialized] private bool _interactPressedThisFrame;
+        [System.NonSerialized] private bool _equipPressedThisFrame;
+        [System.NonSerialized] private bool _hasFocus = true;
 
         public InputActionAsset ActionsAsset
         {

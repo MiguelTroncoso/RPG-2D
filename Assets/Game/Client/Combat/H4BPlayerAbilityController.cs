@@ -31,7 +31,7 @@ namespace Lumbre.Game.Client.Combat
         private HeatResourceModel _heat;
         private DefenseAbilityModel _defense;
         private AreaAttackAbilityModel _areaAttack;
-        private H10PlayerActionStateController _actionState;
+        [NonSerialized] private H10PlayerActionStateController _actionState;
 
         public int CurrentHeat => _heat?.CurrentHeat ?? Mathf.Clamp(initialHeat, 0, MaxHeat);
         public int MaxHeat => Mathf.Max(1, maxHeat);

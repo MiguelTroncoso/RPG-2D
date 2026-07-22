@@ -6617,10 +6617,6 @@ MonoBehaviour:
   inputReader: {fileID: 1265252929}
   respawnPoint: {fileID: 1469631351}
   movementSpeed: 2.4
-  acceleration: 64
-  deceleration: 128
-  inputDeadZone: 0.12
-  analogResponse: 1
   outOfBoundsMargin: 1.5
 --- !u!114 &1265252929
 MonoBehaviour:

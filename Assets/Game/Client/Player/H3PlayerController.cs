@@ -17,18 +17,18 @@ namespace Lumbre.Game.Client.Player
         [SerializeField] private H3PlayerInputReader inputReader;
         [SerializeField] private Transform respawnPoint;
         [SerializeField, Min(0.1f)] private float movementSpeed = 2.4f;
-        [SerializeField, Min(0f)] private float acceleration = 64f;
-        [SerializeField, Min(0f)] private float deceleration = 128f;
-        [SerializeField, Range(0f, 0.95f)] private float inputDeadZone = 0.12f;
-        [SerializeField, Min(0.01f)] private float analogResponse = 1f;
+        [System.NonSerialized] private float acceleration = 64f;
+        [System.NonSerialized] private float deceleration = 128f;
+        [System.NonSerialized] private float inputDeadZone = 0.12f;
+        [System.NonSerialized] private float analogResponse = 1f;
         [SerializeField, Min(0f)] private float outOfBoundsMargin = 1.5f;
 
         private Rigidbody2D _body;
         private MovementIntent _intent;
-        private PlayerLocomotionModel _locomotion;
-        private Vector2 _currentWorldVelocity;
-        private Vector2 _lastLookDirection = Vector2.right;
-        private H10PlayerActionStateController _actionState;
+        [System.NonSerialized] private PlayerLocomotionModel _locomotion;
+        [System.NonSerialized] private Vector2 _currentWorldVelocity;
+        [System.NonSerialized] private Vector2 _lastLookDirection = Vector2.right;
+        [System.NonSerialized] private H10PlayerActionStateController _actionState;
 
         public MovementIntent CurrentIntent => _intent;
         public Vector2 CurrentWorldDirection => _currentWorldVelocity;

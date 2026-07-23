@@ -171,3 +171,24 @@ SHA-256: a78cf8d9aaefc9703032860023cc690cea19ddeceb641640125a3e236ff3004f
 ```
 
 La escena incluye Bootstrap y VerticalSlice habilitadas, el Input System unificado y Cinemachine oficial. El APK queda ignorado por `.gitignore` y no se publica en GitHub. Todavía falta instalarlo en un Android físico para validar joystick, ATK, DEF, AOE, safe area, cámara, pausa, interacción, equipamiento, arranques y métricas; un build correcto no se presenta como validación de hardware.
+
+## H10.2 — game feel y feedback de combate
+
+El builder H10.2 configura y valida la secuencia visual sin persistir estado runtime. La generación reproducible se ejecutó con:
+
+```bash
+"$UNITY" -batchmode -nographics -quit -projectPath "$PROJECT" \
+  -executeMethod Lumbre.Game.Editor.H10_2GameFeelBuilder.BuildAndroidDevelopment \
+  -logFile /tmp/lumbre-h10-2-android-build.log
+```
+
+Configuración y resultado:
+
+```text
+Builds/Android/LumbreDeNacar-v0.8.1-H10.2.apk
+76,184,173 bytes
+SHA-256: 3e2e9fa13d8b2100e3d6250ad5db54f4dc2ebeb3da5313fe35bf3c42b9c2393b
+ARM64 · OpenGLES3 · Development · AllowDebugging · ConnectWithProfiler · CleanBuildCache
+```
+
+El APK se instaló manualmente mediante ADB en Xiaomi 24090RA29G, Android 16/API 36, resolución renderizada landscape 2712×1220. La variante anterior con tiempos de secuencia serializados reprodujo `CachedReader::OutOfBoundsError`; la salida indicada arriba reconstruye esos valores en runtime y arrancó correctamente. Bootstrap, VerticalSlice, cámara, jugador y HUD se verificaron después de la carga. La evidencia visual está en `docs/captures/android-h10.2-physical/`. Android 16 bloqueó la inyección de eventos `adb shell input`, y el Profiler no pudo conectar por UDP; la validación táctil interactiva y el perfilado siguen pendientes. El APK y `Builds/` permanecen ignorados.

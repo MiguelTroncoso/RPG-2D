@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Lumbre.Game.Client.Player;
 using Lumbre.Game.Domain.Combat;
@@ -26,12 +27,15 @@ namespace Lumbre.Game.Client.Combat
         [SerializeField, Min(1)] private int areaDamage = ProjectConstants.PlayerAreaAttackDamage;
         [SerializeField, Min(0.1f)] private float areaRadius = ProjectConstants.PlayerAreaAttackRadius;
         [SerializeField, Min(0f)] private float areaCooldown = ProjectConstants.PlayerAreaAttackCooldown;
+        private float areaAnticipationDuration = 0.14f;
+        private float areaRecoveryDuration = 0.12f;
 
         private ICombatTimeSource _timeSource;
         private HeatResourceModel _heat;
         private DefenseAbilityModel _defense;
         private AreaAttackAbilityModel _areaAttack;
         [NonSerialized] private H10PlayerActionStateController _actionState;
+        [NonSerialized] private Coroutine _areaRoutine;
 
         public int CurrentHeat => _heat?.CurrentHeat ?? Mathf.Clamp(initialHeat, 0, MaxHeat);
         public int MaxHeat => Mathf.Max(1, maxHeat);
@@ -40,7 +44,11 @@ namespace Lumbre.Game.Client.Combat
         public float DefenseCooldownRemaining => _defense?.CooldownRemaining ?? 0f;
         public int AreaHeatCost => _areaAttack?.HeatCost ?? Mathf.Max(0, areaHeatCost);
         public float AreaCooldownRemaining => _areaAttack?.CooldownRemaining ?? 0f;
+        public float AreaRadius => _areaAttack?.Radius ?? Mathf.Max(0.1f, areaRadius);
+        public float AreaAnticipationDuration => Mathf.Max(0f, areaAnticipationDuration);
+        public float AreaRecoveryDuration => Mathf.Max(0f, areaRecoveryDuration);
         public event Action<AbilityResult> DefenseActivated;
+        public event Action AreaAttackSequenceStarted;
         public event Action<AbilityResult> AreaAttackActivated;
 
         public void Configure(H3PlayerInputReader reader,
@@ -90,6 +98,14 @@ namespace Lumbre.Game.Client.Combat
             {
                 combatController.BasicAttackSucceeded -= HandleBasicAttack;
             }
+
+            if (_areaRoutine != null)
+            {
+                StopCoroutine(_areaRoutine);
+                _areaRoutine = null;
+            }
+
+            _actionState?.Complete(PlayerActionState.AreaAttack);
         }
 
         private void OnDestroy()
@@ -170,19 +186,45 @@ namespace Lumbre.Game.Client.Combat
             return TryAreaAttackCore();
         }
 
+        public void ConfigurePresentation(float anticipationDuration, float recoveryDuration)
+        {
+            areaAnticipationDuration = Mathf.Max(0f, anticipationDuration);
+            areaRecoveryDuration = Mathf.Max(0f, recoveryDuration);
+        }
+
         private void TryAreaAttackFromInput()
         {
-            if (_actionState != null && !_actionState.TryBegin(PlayerActionState.AreaAttack))
+            if (_areaRoutine != null || _actionState != null
+                && !_actionState.TryBegin(PlayerActionState.AreaAttack))
             {
                 return;
             }
 
-            try
+            InitializeModelsIfNeeded();
+            if (Time.timeScale <= 0f || health != null && !health.IsAlive
+                || _areaAttack == null || !_areaAttack.CanActivate)
             {
                 TryAreaAttackCore();
+                _actionState?.Complete(PlayerActionState.AreaAttack);
+                return;
+            }
+
+            _areaRoutine = StartCoroutine(AreaAttackSequence());
+        }
+
+        private IEnumerator AreaAttackSequence()
+        {
+            try
+            {
+                AreaAttackSequenceStarted?.Invoke();
+                feedback?.PlayAreaPreview(AreaRadius, AreaAnticipationDuration);
+                yield return new WaitForSeconds(AreaAnticipationDuration);
+                TryAreaAttackCore();
+                yield return new WaitForSeconds(AreaRecoveryDuration);
             }
             finally
             {
+                _areaRoutine = null;
                 _actionState?.Complete(PlayerActionState.AreaAttack);
             }
         }
@@ -204,8 +246,9 @@ namespace Lumbre.Game.Client.Combat
                 return result;
             }
 
+            var effectiveRadius = _areaAttack.Radius;
             var targets = new HashSet<H4CombatHealth>();
-            var colliders = Physics2D.OverlapCircleAll(transform.position, areaRadius, targetLayers);
+            var colliders = Physics2D.OverlapCircleAll(transform.position, effectiveRadius, targetLayers);
             foreach (var collider in colliders)
             {
                 var target = collider.GetComponentInParent<H4CombatHealth>();
@@ -217,7 +260,7 @@ namespace Lumbre.Game.Client.Combat
                 target.ReceiveDamage(new CombatDamage(areaDamage, "player-heat-area"));
             }
 
-            feedback?.PlayArea(areaRadius);
+            feedback?.PlayArea(effectiveRadius);
             AreaAttackActivated?.Invoke(result);
             return result;
         }
@@ -271,7 +314,8 @@ namespace Lumbre.Game.Client.Combat
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(1f, 0.25f, 0.9f, 0.65f);
-            Gizmos.DrawWireSphere(transform.position, areaRadius);
+            Gizmos.DrawWireSphere(transform.position, AreaRadius);
         }
+
     }
 }

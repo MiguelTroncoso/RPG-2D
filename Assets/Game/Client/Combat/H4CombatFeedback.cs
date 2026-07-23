@@ -17,6 +17,8 @@ namespace Lumbre.Game.Client.Combat
         private AudioSource _audioSource;
         private AudioClip _hitClip;
         private AudioClip _deathClip;
+        private Transform _visualTransform;
+        private Vector3 _visualBaseLocalPosition;
         private bool _dead;
 
         private void Awake()
@@ -28,6 +30,18 @@ namespace Lumbre.Game.Client.Combat
             {
                 _baseColors[index] = _renderers[index].material.color;
             }
+
+            for (var index = 0; index < _renderers.Length; index++)
+            {
+                if (_renderers[index] != null)
+                {
+                    _visualTransform = _renderers[index].transform;
+                    break;
+                }
+            }
+
+            _visualTransform ??= transform;
+            _visualBaseLocalPosition = _visualTransform.localPosition;
 
             _audioSource = GetComponent<AudioSource>();
             if (_audioSource == null)
@@ -71,6 +85,16 @@ namespace Lumbre.Game.Client.Combat
             PlayTone(ref _hitClip, 620f, 0.06f, 0.18f);
         }
 
+        public void PlayAttackAnticipation()
+        {
+            if (_dead || _visualTransform == null)
+            {
+                return;
+            }
+
+            StartCoroutine(AttackAnticipationPulse());
+        }
+
         private void HandleDamage(DamageResult result)
         {
             if (result.Killed)
@@ -102,19 +126,39 @@ namespace Lumbre.Game.Client.Combat
             RestoreRendererColors();
         }
 
+        private IEnumerator AttackAnticipationPulse()
+        {
+            _visualTransform.localPosition = _visualBaseLocalPosition + Vector3.down * 0.02f;
+            yield return new WaitForSeconds(0.06f);
+            if (!_dead)
+            {
+                _visualTransform.localPosition = _visualBaseLocalPosition;
+            }
+        }
+
         private IEnumerator AttackPulse()
         {
-            var originalScale = transform.localScale;
-            transform.localScale = originalScale * 1.1f;
+            if (_visualTransform == null)
+            {
+                yield break;
+            }
+
+            _visualTransform.localPosition = _visualBaseLocalPosition + Vector3.up * 0.035f;
             yield return new WaitForSeconds(0.08f);
-            transform.localScale = originalScale;
+            if (!_dead)
+            {
+                _visualTransform.localPosition = _visualBaseLocalPosition;
+            }
         }
 
         private IEnumerator DeathSequence()
         {
             SetRendererColor(deathColor);
-            var originalScale = transform.localScale;
-            transform.localScale = originalScale * 0.8f;
+            if (_visualTransform != null)
+            {
+                _visualTransform.localPosition = _visualBaseLocalPosition + Vector3.down * 0.04f;
+                _visualTransform.localScale *= 0.8f;
+            }
             yield return new WaitForSeconds(deathDuration);
             for (var index = 0; index < _renderers.Length; index++)
             {

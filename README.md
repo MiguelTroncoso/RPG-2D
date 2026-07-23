@@ -2,7 +2,7 @@
 
 Documento de orientación inicial para un MMORPG 2D isométrico, original y orientado primero a Android.
 
-> Estado: v0.8.1 Alpha · H10 — locomoción y combate táctil implementados; validación física Android pendiente. H0–H9.2 estables.
+> Estado: v0.8.1 Alpha · H10.2 — game feel implementado con observaciones; crash Android de serialización corregido y validación táctil manual/Profiler pendientes. H0–H9.2 estables.
 
 ## Resumen
 
@@ -49,11 +49,12 @@ La propuesta no intenta ganar por tamaño desde el primer día. El objetivo inic
 - [H9.1 physical validation](docs/H9_1_PHYSICAL_VALIDATION.md): regresiones, builder, APK y estado de la validación física.
 - [H9.2 Android layout fix](docs/H9_2_ANDROID_LAYOUT_FIX.md): correcciones de safe area, viewport, HUD, joystick y prompts táctiles.
 - [H10 player control and touch combat](docs/H10_PLAYER_CONTROL_AND_COMBAT.md): locomoción 8-direcciones, input unificado, acciones táctiles y regresiones.
+- [H10.2 game feel](docs/H10_2_GAME_FEEL.md): locomoción natural, secuencia de impacto, feedback DEF/AOE y validación Android.
 
 ## Qué no se implementa todavía
 
-H10 conserva el alcance del vertical slice y conecta la locomoción 8-direcciones y el combate existente con joystick, touch y teclado/gamepad de QA. Todavía no implementa crafting, tienda, economía, monedas, profesiones, atributos avanzados, más niveles, varias partidas, nube, cuentas, login, backend online, networking, servidor, multiplayer, nuevos enemigos, mapas, misiones, habilidades ni arte final de producción. La validación física Android del APK H10 queda pendiente; no se inicia H11.
+H10.2 conserva el alcance del vertical slice y mejora la sensación de locomoción y combate existente con anticipación, impacto, reacción y recuperación. También corrige el crash Android demostrado por los tiempos de combate serializados, reconstruyéndolos en runtime sin cambiar gameplay. Todavía no implementa crafting, tienda, economía, monedas, profesiones, atributos avanzados, más niveles, varias partidas, nube, cuentas, login, backend online, networking, servidor, multiplayer, nuevos enemigos, mapas, misiones, habilidades ni arte final de producción. El APK H10.2 arranca correctamente en el Redmi de referencia y su layout físico quedó verificado; la interacción táctil completa y el perfilado conectado permanecen pendientes por las restricciones de Android 16. No se inicia H10.3 ni H11.
 
 ## Próximo paso propuesto
 
-La siguiente acción es instalar el APK H10 en un Android de referencia y validar físicamente controles, cámara, HUD, pausa y combate. Después corresponde la revisión técnica del repositorio; no se inicia H11 ni se cambia la versión v0.8.1 Alpha antes de esa revisión.
+La siguiente acción es completar la validación manual de controles y cerrar las observaciones de Profiler en el Android de referencia. Después corresponde la revisión técnica del repositorio; no se inicia H10.3 ni H11 ni se cambia la versión v0.8.1 Alpha antes de esa revisión.

@@ -1,5 +1,29 @@
 # Changelog técnico
 
+## 2026-07-22 — H10.2 game feel, locomoción natural y feedback de combate — v0.8.1 Alpha
+
+### Incluido
+
+- Secuencia de ataque con anticipación, impacto único, reacción y recuperación mediante `AttackSequenceModel` fuera de `MonoBehaviour`.
+- Feedback provisional de locomoción con velocidad normalizada, bob discreto y facing estable; se corrigió el exceso de velocidad isométrico en diagonales.
+- Feedback de impacto para atacante y objetivo, sonido de rechazo reutilizando H7 y Cinemachine Impulse sutil solo en impactos exitosos.
+- DEF mantiene su presentación durante toda la duración configurada; AOE muestra anticipación con el mismo radio lógico y conserva coste/cooldown.
+- `H10_2GameFeelBuilder` idempotente y nuevas regresiones EditMode/PlayMode.
+
+### Validación
+
+- EditMode: 30/30 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/h10-2-editmode-noserialized.xml`.
+- PlayMode: 38/38 pasados, 0 fallidos, 0 ignorados. XML: `/tmp/h10-2-playmode-noserialized.xml`.
+- Build y Validate ejecutados dos veces con código de salida 0 y sin duplicaciones.
+- APK `Builds/Android/LumbreDeNacar-v0.8.1-H10.2.apk`: 76,184,173 bytes, SHA-256 `3e2e9fa13d8b2100e3d6250ad5db54f4dc2ebeb3da5313fe35bf3c42b9c2393b`.
+- La variante H10.2 con tiempos serializados reprodujo `CachedReader::OutOfBoundsError`; la variante final reconstruye esos tiempos en runtime, se instaló y arrancó en Xiaomi 24090RA29G con Android 16/API 36 sin crash nativo.
+- Bootstrap, VerticalSlice, jugador, cámara y HUD inicializaron correctamente; la escena final solo conserva el marcador H10.2 y no persiste estado temporal.
+- La evidencia visual física confirma layout landscape, safe area, HUD, cámara y controles; Android 16 bloqueó la inyección `adb shell input`, por lo que la interacción táctil manual completa queda como observación.
+
+### Estado H10.2
+
+**IMPLEMENTADO CON OBSERVACIONES:** se mantiene `v0.8.1 Alpha`, no se inicia H10.3 ni H11 y la rama queda lista para revisión técnica.
+
 ## 2026-07-21 — H10 control del jugador, locomoción y combate táctil — v0.8.1 Alpha
 
 ### Incluido

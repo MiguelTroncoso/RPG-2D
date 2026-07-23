@@ -109,6 +109,7 @@ namespace Lumbre.Game.Client.Presentation
             if (playerCombat != null)
             {
                 playerCombat.BasicAttackSucceeded += HandleBasicAttack;
+                playerCombat.AttackResolved += HandleAttackResolved;
             }
 
             if (playerAbilities != null)
@@ -151,6 +152,14 @@ namespace Lumbre.Game.Client.Presentation
             vfxPool?.Play(H7VfxKind.Attack, position, new Color(1f, 0.55f, 0.18f, 1f));
             audioFeedback?.PlayAttack();
             cameraPolish?.Shake(0.06f);
+        }
+
+        private void HandleAttackResolved(Lumbre.Game.Domain.Combat.AttackResult result)
+        {
+            if (!result.Succeeded)
+            {
+                audioFeedback?.PlayRejected();
+            }
         }
 
         private void HandleDefense(Lumbre.Game.Domain.Combat.AbilityResult result)
@@ -228,6 +237,7 @@ namespace Lumbre.Game.Client.Presentation
             if (playerCombat != null)
             {
                 playerCombat.BasicAttackSucceeded -= HandleBasicAttack;
+                playerCombat.AttackResolved -= HandleAttackResolved;
             }
 
             if (playerAbilities != null)

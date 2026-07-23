@@ -253,6 +253,76 @@ namespace Lumbre.Game.Tests
         }
 
         [UnityTest]
+        public IEnumerator AttackAppliesAtImpactAndOnlyOnce()
+        {
+            yield return LoadSlice();
+            var player = GetPlayer();
+            var target = PrepareTarget(player, "Mordeluz");
+            var combat = player.GetComponent<H4PlayerCombatController>();
+            var sequenceStarts = 0;
+            combat.AttackSequenceStarted += () => sequenceStarts++;
+            var gamepad = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                InputSystem.QueueStateEvent(gamepad,
+                    new GamepadState().WithButton(GamepadButton.South, true));
+                InputSystem.Update();
+                yield return null;
+
+                Assert.AreEqual(target.MaxHealth, target.CurrentHealth,
+                    "Damage should wait for the visual impact phase.");
+                yield return new WaitForSeconds(combat.AttackAnticipationDuration + 0.04f);
+                Assert.AreEqual(target.MaxHealth - ProjectConstants.PlayerBasicAttackDamage,
+                    target.CurrentHealth);
+                yield return new WaitForSeconds(combat.AttackRecoveryDuration + 0.04f);
+                Assert.AreEqual(1, sequenceStarts);
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(gamepad);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator AttackWithoutTargetProducesNoSuccessFeedback()
+        {
+            yield return LoadSlice();
+            var player = GetPlayer();
+            DisableEnemyAi();
+            var combat = player.GetComponent<H4PlayerCombatController>();
+            var resolved = 0;
+            var succeeded = 0;
+            combat.AttackResolved += _ => resolved++;
+            combat.BasicAttackSucceeded += _ => succeeded++;
+            var gamepad = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                yield return PressGamepadButton(gamepad, GamepadButton.South);
+                Assert.That(resolved, Is.GreaterThan(0));
+                Assert.AreEqual(0, succeeded);
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(gamepad);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator DefensePresentationLastsForTheConfiguredWindow()
+        {
+            yield return LoadSlice();
+            var player = GetPlayer();
+            var abilities = player.GetComponent<H4BPlayerAbilityController>();
+            var feedback = player.GetComponent<H4BAbilityFeedback>();
+
+            Assert.IsTrue(abilities.TryActivateDefense().Succeeded);
+            yield return null;
+            Assert.IsTrue(feedback.IsDefenseVisualActive);
+            yield return new WaitForSeconds(abilities.DefenseRemaining + 0.1f);
+            Assert.IsFalse(feedback.IsDefenseVisualActive);
+        }
+
+        [UnityTest]
         public IEnumerator TouchDefenseActivatesThePlayerDefenseState()
         {
             yield return LoadSlice();
@@ -459,7 +529,7 @@ namespace Lumbre.Game.Tests
             InputSystem.QueueStateEvent(gamepad,
                 new GamepadState().WithButton(button, false));
             InputSystem.Update();
-            yield return null;
+            yield return new WaitForSeconds(0.32f);
         }
 
         private static IEnumerator PressTouchButton(string objectName)
@@ -479,7 +549,7 @@ namespace Lumbre.Game.Tests
             yield return null;
             up.OnPointerUp(pointer);
             InputSystem.Update();
-            yield return null;
+            yield return new WaitForSeconds(0.32f);
         }
     }
 }

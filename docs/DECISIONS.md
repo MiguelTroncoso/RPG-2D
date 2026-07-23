@@ -382,3 +382,30 @@
 - **Decisión:** capturar `InputAction.started` en `H3PlayerInputReader`, reutilizar el mismo mapa para touch/teclado/gamepad, reiniciar dispositivos virtuales al perder foco y centralizar la puerta de estado en `PlayerActionStateModel`. Mantener locomoción, intención, velocidad y reglas temporales fuera de `MonoBehaviour`.
 - **Motivo:** hace determinista el borde Android sin reescribir H3–H9 y permite que un cliente remoto futuro valide intenciones con los mismos contratos.
 - **Consecuencias:** H10 añade complejidad acotada de adaptación y tests, pero no crea networking, autoridad local paralela, target lock persistente ni modifica daño, cooldown, Calor, misión, progresión, inventario o persistencia. La aceptación física del APK sigue pendiente.
+
+## DEC-0041 — El combate debe comunicar anticipación, impacto y recuperación
+
+- **Fecha:** 2026-07-22
+- **Estado:** aprobada durante H10.2
+- **Problema:** aplicar daño correctamente no garantiza que el jugador perciba cuándo solicitó el ataque, cuándo impactó ni cuándo puede volver a actuar.
+- **Decisión:** mantener las reglas de H4/H4B en el dominio y añadir `AttackSequenceModel` con fases `Idle`, `Anticipation`, `Impact` y `Recovery`. La presentación observa los eventos para reproducir animación, reacción, audio y un Impulse Cinemachine sutil; el daño solo se consume una vez en el impacto.
+- **Motivo:** mejora la lectura y la sensación física sin duplicar input, daño, cooldown, Calor o autoridad de gameplay.
+- **Consecuencias:** el timing visual queda configurable en el Builder H10.2 (`0.10/0.18` para ATK y `0.14/0.12` para AOE). La ausencia de una sesión de Profiler conectada y la validación táctil manual completa siguen siendo observaciones de hardware, no razones para mover reglas al cliente visual.
+
+## DEC-0042 — Estado runtime y validación física permanecen fuera de la configuración persistente
+
+- **Fecha:** 2026-07-22
+- **Estado:** aprobada durante H10.2
+- **Problema:** el crash H10.1 demostró que serializar estado de ejecución o aceptar un APK sin comprobar el arranque real puede ocultar fallos de escena y plataforma.
+- **Decisión:** marcar las secuencias, coroutines y referencias temporales como estado reconstruible; los Builders solo persisten configuración de diseño. La Definition of Done de H10.2 exige tests, Build/Validate idempotentes, APK instalado y logcat revisado, declarando por separado cualquier limitación de interacción o perfilado.
+- **Motivo:** mantiene estable el YAML de `VerticalSlice` y evita confundir una prueba automatizada con evidencia física.
+- **Consecuencias:** Android 16 puede impedir la automatización de `adb shell input` y ConnectWithProfiler puede requerir red o permisos adicionales; en ese caso el hito se publica como implementado con observaciones hasta completar la validación manual.
+
+## DEC-0043 — Los tiempos de feedback de H10.2 se reconstruyen en runtime
+
+- **Fecha:** 2026-07-22
+- **Estado:** aprobada durante H10.2
+- **Problema:** la variante Android de H10.2 que persistía los cuatro tiempos de anticipación/recuperación en componentes de `VerticalSlice` reprodujo `CachedReader::OutOfBoundsError` durante `LoadSceneOperation::Perform`; el APK H10.1 exacto arrancaba correctamente.
+- **Decisión:** mantener los valores de diseño `0.10/0.18` para ATK y `0.14/0.12` para AOE como defaults de runtime y aplicarlos mediante configuración explícita del Builder, sin serializar los campos temporales en la escena. Las fases, coroutines y consumo de impacto continúan siendo estado reconstruible.
+- **Motivo:** la comparación H10.1 → H10.2 serializado → H10.2 no serializado demuestra que la persistencia de esos datos temporales era el factor diferencial del crash, y la corrección no altera daño, cooldown, calor, radio ni contenido.
+- **Consecuencias:** el APK final arranca correctamente en el Redmi de referencia; la escena solo conserva el marcador H10.2. La validación táctil manual completa y el perfilado de Unity siguen pendientes por restricciones de Android 16.

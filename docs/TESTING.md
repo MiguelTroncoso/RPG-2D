@@ -392,6 +392,33 @@ Resultado reproducible de H10:
 
 La validación física queda separada de las pruebas automáticas: instalación del APK, layout real, pulsaciones en pantalla, logcat, Unity Profiler, FPS, memoria, temperatura y batería requieren un Android conectado. No se debe declarar H10 aprobado únicamente por el XML o por la existencia del APK.
 
+## H10.2 — game feel y feedback de combate
+
+La suite H10.2 conserva el runner anterior y se ejecutó sin `-quit`:
+
+```bash
+"$UNITY" -batchmode -nographics -projectPath "$PROJECT" \
+  -runTests -testPlatform EditMode \
+  -testResults /tmp/h10-2-editmode-noserialized.xml \
+  -logFile /tmp/h10-2-editmode-noserialized.log
+
+"$UNITY" -batchmode -nographics -projectPath "$PROJECT" \
+  -runTests -testPlatform PlayMode \
+  -testResults /tmp/h10-2-playmode-noserialized.xml \
+  -logFile /tmp/h10-2-playmode-noserialized.log
+```
+
+Resultado reproducible:
+
+- EditMode: **30/30 pasados**, 0 fallidos, 0 ignorados; XML `/tmp/h10-2-editmode-noserialized.xml`; código de salida 0.
+- PlayMode: **38/38 pasados**, 0 fallidos, 0 ignorados; XML `/tmp/h10-2-playmode-noserialized.xml`; código de salida 0.
+- Las pruebas nuevas cubren fases de ataque, impacto único, rechazo sin objetivo, DEF durante su ventana, AOE con radio lógico, respuesta analógica y límite diagonal.
+- `H10_2GameFeelBuilder.Build` y `Validate` se ejecutaron dos veces cada uno; las cuatro ejecuciones terminaron con código 0.
+- El APK ARM64/OpenGLES3 se instaló correctamente mediante ADB en Xiaomi 24090RA29G, Android 16/API 36. El lanzamiento de la variante final llegó a proceso activo y la carga completa de Bootstrap → VerticalSlice, cámara, jugador y HUD quedó confirmada.
+- La variante final sin tiempos serializados arrancó después de la carga asíncrona; no quedaron zonas negras persistentes ni errores `CachedReader`/`OutOfBounds`/`SIGSEGV`/ANR. La variante con esos tiempos persistidos sí reprodujo el crash nativo, por lo que la comparación queda registrada como causa raíz de H10.2.
+- `adb shell input tap/swipe` fue rechazado por `SecurityException` de Android 16; la pulsación táctil interactiva debe cerrarse manualmente en el dispositivo y no se marca como automatizada.
+- `dumpsys meminfo` registró aproximadamente 542097 kB de TOTAL PSS y 149391 kB de Graphics. `dumpsys gfxinfo` no entregó percentiles utilizables; no se presenta un benchmark universal.
+
 ## Criterio de calidad H4–H8
 
 - cero errores de compilación;

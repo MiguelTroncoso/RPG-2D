@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Lumbre.Game.Domain.Combat;
 using Lumbre.Game.Domain.Movement;
 using Lumbre.Game.Client.Player;
@@ -13,14 +14,25 @@ namespace Lumbre.Game.Client.Combat
         [SerializeField] private H4CombatHealth health;
         [SerializeField] private LayerMask targetLayers;
         [SerializeField, Min(0.1f)] private float attackRange = 1.45f;
+        private float attackAnticipationDuration = 0.1f;
+        private float attackRecoveryDuration = 0.18f;
 
         [NonSerialized] private H10PlayerActionStateController actionState;
         [NonSerialized] private H4CombatHealth recentAttackTarget;
         [NonSerialized] private float recentAttackTargetAt = float.NegativeInfinity;
-        private const float RecentTargetContinuitySeconds = 0.75f;
+        [NonSerialized] private AttackSequenceModel attackSequence;
+        [NonSerialized] private Coroutine attackRoutine;
+        private const float RecentTargetContinuitySeconds = 1.5f;
 
         public AttackResult LastAttackResult { get; private set; }
         public float AttackRange => attackRange;
+        public float AttackAnticipationDuration => Mathf.Max(0f, attackAnticipationDuration);
+        public float AttackRecoveryDuration => Mathf.Max(0f, attackRecoveryDuration);
+        public AttackSequencePhase AttackSequencePhase => attackSequence?.Phase
+            ?? AttackSequencePhase.Idle;
+        public bool IsAttackSequenceActive => attackSequence?.IsActive == true;
+        public event Action AttackSequenceStarted;
+        public event Action<AttackResult> AttackResolved;
         public event Action<AttackResult> BasicAttackSucceeded;
 
         public void Configure(H3PlayerInputReader reader, H4BasicAttacker basicAttacker,
@@ -31,6 +43,7 @@ namespace Lumbre.Game.Client.Combat
             health = combatHealth;
             targetLayers = layers;
             attackRange = Mathf.Max(0.1f, range);
+            InitializeSequence();
         }
 
         private void Awake()
@@ -39,6 +52,7 @@ namespace Lumbre.Game.Client.Combat
             attacker ??= GetComponent<H4BasicAttacker>();
             health ??= GetComponent<H4CombatHealth>();
             actionState ??= GetComponent<H10PlayerActionStateController>();
+            InitializeSequence();
         }
 
         private void Update()
@@ -54,49 +68,180 @@ namespace Lumbre.Game.Client.Combat
             return TryBasicAttackCore();
         }
 
-        private AttackResult TryBasicAttackFromInput()
+        public void ConfigureTiming(float anticipationDuration, float recoveryDuration)
         {
-            if (actionState != null && !actionState.TryBegin(PlayerActionState.Attacking))
+            attackAnticipationDuration = Mathf.Max(0f, anticipationDuration);
+            attackRecoveryDuration = Mathf.Max(0f, recoveryDuration);
+            InitializeSequence();
+        }
+
+        private void TryBasicAttackFromInput()
+        {
+            if (attackRoutine != null || actionState != null
+                && !actionState.TryBegin(PlayerActionState.Attacking))
             {
-                LastAttackResult = AttackResult.Failure(AttackResultCode.InvalidTarget);
-                return LastAttackResult;
+                PublishFailure(AttackResultCode.InvalidTarget);
+                return;
             }
 
-            try
+            var target = FindNearestTarget();
+            if (target == null)
             {
-                return TryBasicAttackCore();
+                CompleteInputAction();
+                PublishFailure(AttackResultCode.InvalidTarget);
+                return;
             }
-            finally
+
+            if (attacker == null || !attacker.CanAttack(Time.time))
             {
-                actionState?.Complete(PlayerActionState.Attacking);
+                CompleteInputAction();
+                PublishFailure(AttackResultCode.Cooldown);
+                return;
             }
+
+            InitializeSequence();
+            if (!attackSequence.TryBegin(Time.time))
+            {
+                CompleteInputAction();
+                PublishFailure(AttackResultCode.InvalidTarget);
+                return;
+            }
+
+            attackRoutine = StartCoroutine(AttackSequence(target));
         }
 
         private AttackResult TryBasicAttackCore()
         {
             if (Time.timeScale <= 0f || health != null && !health.IsAlive)
             {
-                LastAttackResult = AttackResult.Failure(AttackResultCode.InvalidTarget);
+                PublishFailure(AttackResultCode.InvalidTarget);
                 return LastAttackResult;
             }
 
             var target = FindNearestTarget();
             if (target == null)
             {
-                LastAttackResult = AttackResult.Failure(AttackResultCode.InvalidTarget);
+                PublishFailure(AttackResultCode.InvalidTarget);
                 return LastAttackResult;
             }
 
-            LastAttackResult = attacker.TryAttack(target, Time.time);
-            if (LastAttackResult.Succeeded)
+            return ResolveAttack(target);
+        }
+
+        private IEnumerator AttackSequence(ITargetable target)
+        {
+            var feedback = GetComponent<H4CombatFeedback>();
+            try
             {
-                recentAttackTarget = target as H4CombatHealth;
-                recentAttackTargetAt = Time.time;
-                GetComponent<H4CombatFeedback>()?.PlayAttack();
-                BasicAttackSucceeded?.Invoke(LastAttackResult);
+                AttackSequenceStarted?.Invoke();
+                feedback?.PlayAttackAnticipation();
+                yield return new WaitForSeconds(AttackAnticipationDuration);
+
+                if (!attackSequence.TryEnterImpact(Time.time))
+                {
+                    PublishFailure(AttackResultCode.InvalidTarget);
+                    yield break;
+                }
+
+                AttackResult result;
+                var resultPublished = false;
+                if (Time.timeScale <= 0f || health != null && !health.IsAlive)
+                {
+                    PublishFailure(AttackResultCode.InvalidTarget);
+                    result = LastAttackResult;
+                    resultPublished = true;
+                }
+                else if (!IsTargetValidAtImpact(target))
+                {
+                    var code = target?.Health?.IsAlive == false
+                        ? AttackResultCode.TargetDead
+                        : AttackResultCode.InvalidTarget;
+                    PublishFailure(code);
+                    result = LastAttackResult;
+                    resultPublished = true;
+                }
+                else if (!attackSequence.TryConsumeImpact())
+                {
+                    PublishFailure(AttackResultCode.InvalidTarget);
+                    result = LastAttackResult;
+                    resultPublished = true;
+                }
+                else
+                {
+                    result = ResolveAttack(target);
+                    resultPublished = true;
+                }
+
+                if (!result.Succeeded && !resultPublished)
+                {
+                    LastAttackResult = result;
+                    AttackResolved?.Invoke(result);
+                }
+
+                attackSequence.TryEnterRecovery(Time.time);
+                yield return new WaitForSeconds(AttackRecoveryDuration);
+                attackSequence.TryComplete(Time.time);
+            }
+            finally
+            {
+                attackSequence.Reset();
+                attackRoutine = null;
+                CompleteInputAction();
+            }
+        }
+
+        private AttackResult ResolveAttack(ITargetable target)
+        {
+            LastAttackResult = attacker == null
+                ? AttackResult.Failure(AttackResultCode.InvalidTarget)
+                : attacker.TryAttack(target, Time.time);
+            AttackResolved?.Invoke(LastAttackResult);
+            if (!LastAttackResult.Succeeded)
+            {
+                return LastAttackResult;
             }
 
+            recentAttackTarget = target as H4CombatHealth;
+            recentAttackTargetAt = Time.time;
+            GetComponent<H4CombatFeedback>()?.PlayAttack();
+            BasicAttackSucceeded?.Invoke(LastAttackResult);
             return LastAttackResult;
+        }
+
+        private void PublishFailure(AttackResultCode code)
+        {
+            LastAttackResult = AttackResult.Failure(code);
+            AttackResolved?.Invoke(LastAttackResult);
+        }
+
+        private void CompleteInputAction()
+        {
+            actionState?.Complete(PlayerActionState.Attacking);
+        }
+
+        private bool IsTargetValidAtImpact(ITargetable target)
+        {
+            var combatHealth = target as H4CombatHealth;
+            return combatHealth != null && combatHealth.IsTargetable
+                && Vector2.Distance(transform.position, combatHealth.transform.position) <= attackRange;
+        }
+
+        private void InitializeSequence()
+        {
+            attackSequence = new AttackSequenceModel(AttackAnticipationDuration,
+                AttackRecoveryDuration);
+        }
+
+        private void OnDisable()
+        {
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+            }
+
+            attackSequence?.Reset();
+            CompleteInputAction();
         }
 
         private ITargetable FindNearestTarget()

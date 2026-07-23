@@ -17,6 +17,8 @@ namespace Lumbre.Game.Client.Presentation
         private H4PlayerCombatController _playerCombat;
         private H4BPlayerAbilityController _abilities;
         private MordeluzController _enemyController;
+        private Transform _visualTransform;
+        private Vector3 _visualBaseLocalPosition;
         private string _currentState;
         private float _transientUntil;
         private bool _dead;
@@ -50,6 +52,11 @@ namespace Lumbre.Game.Client.Presentation
             _playerCombat = GetComponent<H4PlayerCombatController>();
             _abilities = GetComponent<H4BPlayerAbilityController>();
             _enemyController = GetComponent<MordeluzController>();
+            _visualTransform = spriteRenderer != null ? spriteRenderer.transform : null;
+            if (_visualTransform != null)
+            {
+                _visualBaseLocalPosition = _visualTransform.localPosition;
+            }
         }
 
         private void OnEnable()
@@ -63,11 +70,13 @@ namespace Lumbre.Game.Client.Presentation
             if (_playerCombat != null)
             {
                 _playerCombat.BasicAttackSucceeded += HandleBasicAttack;
+                _playerCombat.AttackSequenceStarted += HandleAttackSequenceStarted;
             }
 
             if (_abilities != null)
             {
                 _abilities.DefenseActivated += HandleDefense;
+                _abilities.AreaAttackSequenceStarted += HandleAreaAttackSequenceStarted;
                 _abilities.AreaAttackActivated += HandleAreaAttack;
             }
 
@@ -88,11 +97,13 @@ namespace Lumbre.Game.Client.Presentation
             if (_playerCombat != null)
             {
                 _playerCombat.BasicAttackSucceeded -= HandleBasicAttack;
+                _playerCombat.AttackSequenceStarted -= HandleAttackSequenceStarted;
             }
 
             if (_abilities != null)
             {
                 _abilities.DefenseActivated -= HandleDefense;
+                _abilities.AreaAttackSequenceStarted -= HandleAreaAttackSequenceStarted;
                 _abilities.AreaAttackActivated -= HandleAreaAttack;
             }
 
@@ -104,16 +115,17 @@ namespace Lumbre.Game.Client.Presentation
 
         private void Update()
         {
-            if (_dead || Time.time < _transientUntil || animator == null)
+            var transient = Time.time < _transientUntil;
+            if (!_dead && !transient && animator != null)
             {
-                return;
+                var moving = _playerController != null
+                    ? _playerController.CurrentWorldDirection.sqrMagnitude > 0.01f
+                    : _enemyController != null && (_enemyController.CurrentState == MordeluzAiState.Follow
+                        || _enemyController.CurrentState == MordeluzAiState.Return);
+                SetState(moving ? "Walk" : "Idle");
             }
 
-            var moving = _playerController != null
-                ? _playerController.CurrentWorldDirection.sqrMagnitude > 0.01f
-                : _enemyController != null && (_enemyController.CurrentState == MordeluzAiState.Follow
-                    || _enemyController.CurrentState == MordeluzAiState.Return);
-            SetState(moving ? "Walk" : "Idle");
+            UpdatePlayerMotionPresentation(transient);
         }
 
         public void PlayTransient(string state, float duration)
@@ -170,6 +182,17 @@ namespace Lumbre.Game.Client.Presentation
             }
         }
 
+        private void HandleAttackSequenceStarted()
+        {
+            if (_playerCombat == null)
+            {
+                return;
+            }
+
+            PlayTransient("Attack", _playerCombat.AttackAnticipationDuration
+                + _playerCombat.AttackRecoveryDuration + 0.04f);
+        }
+
         private void HandleDefense(AbilityResult result)
         {
             if (result.Succeeded)
@@ -184,6 +207,33 @@ namespace Lumbre.Game.Client.Presentation
             {
                 PlayTransient("Area", 0.35f);
             }
+        }
+
+        private void HandleAreaAttackSequenceStarted()
+        {
+            if (_abilities == null)
+            {
+                return;
+            }
+
+            PlayTransient("Area", _abilities.AreaAnticipationDuration
+                + _abilities.AreaRecoveryDuration + 0.08f);
+        }
+
+        private void UpdatePlayerMotionPresentation(bool transient)
+        {
+            if (_playerController == null || _visualTransform == null || _dead)
+            {
+                return;
+            }
+
+            var moving = !transient && _playerController.CurrentSpeedNormalized > 0.03f;
+            var speed = _playerController.CurrentSpeedNormalized;
+            var bob = moving ? Mathf.Sin(Time.time * 18f) * 0.025f * speed : 0f;
+            var targetPosition = _visualBaseLocalPosition + Vector3.up * bob;
+            var blend = 1f - Mathf.Exp(-20f * Time.deltaTime);
+            _visualTransform.localPosition = Vector3.Lerp(_visualTransform.localPosition,
+                targetPosition, blend);
         }
 
         private void HandleEnemyState(MordeluzAiTransition transition)

@@ -20,3 +20,15 @@ Estas seis imágenes provienen de una validación física manual. El APK fue ins
 La evidencia visual confirma, dentro de las escenas capturadas, la safe area, la lectura del HUD, el encuadre de cámara y la visibilidad de los controles táctiles. El perfilado mediante ADB, logcat y Unity Profiler sigue pendiente y no se infiere rendimiento a partir de estas imágenes.
 
 La política de privacidad de capturas y el cierre con observaciones están documentados en `docs/H9_1_PHYSICAL_VALIDATION.md`.
+
+## H10.2 — evidencia física de arranque y layout
+
+Estas capturas fueron tomadas directamente desde un Xiaomi 24090RA29G con Android 16/API 36 después de instalar la variante H10.2 corregida de `LumbreDeNacar-v0.8.1-H10.2.apk` mediante ADB. No contienen notificaciones ni datos personales.
+
+| Orden | Evidencia |
+| --- | --- |
+| 01 | [Gameplay listo después de Bootstrap](android-h10.2-physical/01-gameplay-ready.png) |
+
+La imagen confirma que, una vez completada la carga inicial de IL2CPP y Bootstrap, VerticalSlice ocupa el viewport landscape y muestra jugador, cámara, HUD, safe area, joystick y botones. La primera pantalla oscura durante una instalación limpia pertenece a la carga asíncrona inicial y no persistió. La captura corresponde al APK sin tiempos de combate serializados, que no reprodujo el crash nativo observado en la variante anterior.
+
+La interacción táctil completa, el perfilado conectado y las métricas de largo plazo siguen pendientes: Android 16 rechazó `adb shell input tap/swipe` por permisos de inyección y ConnectWithProfiler no pudo enlazar con el Editor.

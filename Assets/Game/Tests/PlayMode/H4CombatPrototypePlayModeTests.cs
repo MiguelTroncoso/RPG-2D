@@ -49,11 +49,11 @@ namespace Lumbre.Game.Tests
             try
             {
                 yield return PressAttack(gamepad);
-                yield return new WaitForSeconds(0.65f);
+                yield return new WaitForSeconds(0.75f);
                 yield return PressAttack(gamepad);
-                yield return new WaitForSeconds(0.65f);
+                yield return new WaitForSeconds(0.75f);
                 yield return PressAttack(gamepad);
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.35f);
 
                 Assert.IsFalse(enemyHealth.IsAlive, "Mordeluz should die at zero health.");
                 Assert.AreEqual(MordeluzAiState.Dead, ai.CurrentState);
@@ -73,6 +73,8 @@ namespace Lumbre.Game.Tests
             InputSystem.QueueStateEvent(gamepad,
                 new GamepadState().WithButton(GamepadButton.South, false));
             InputSystem.Update();
+            // H10.2 resolves input attacks at visual impact. The caller keeps
+            // its original cooldown cadence, then waits for the final impact.
             yield return null;
         }
     }

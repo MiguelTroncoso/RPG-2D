@@ -39,6 +39,9 @@ namespace Lumbre.Game.Client.Player
         public float Deceleration => Mathf.Max(0f, deceleration);
         public float InputDeadZone => Mathf.Clamp01(inputDeadZone);
         public float AnalogResponse => Mathf.Max(0.01f, analogResponse);
+        public float CurrentSpeedNormalized => MaxSpeed <= 0.0001f
+            ? 0f
+            : Mathf.Clamp01(CurrentWorldVelocity.magnitude / MaxSpeed);
         public Transform RespawnPoint
         {
             get => respawnPoint;
@@ -95,6 +98,12 @@ namespace Lumbre.Game.Client.Player
 
             var velocity = _locomotion.Tick(_intent, Time.fixedDeltaTime);
             _currentWorldVelocity = ToWorldVector(velocity.X, velocity.Y);
+            var maximumWorldSpeed = MaxSpeed;
+            if (maximumWorldSpeed > 0.0001f
+                && _currentWorldVelocity.sqrMagnitude > maximumWorldSpeed * maximumWorldSpeed)
+            {
+                _currentWorldVelocity = _currentWorldVelocity.normalized * maximumWorldSpeed;
+            }
             if (_intent.IsMoving)
             {
                 var direction = ToWorldDirection(_intent);

@@ -14,6 +14,13 @@ namespace Lumbre.Game.Client.Combat
         private AudioClip _abilityClip;
         private LineRenderer _ring;
         private Coroutine _ringRoutine;
+        private Coroutine _defenseRoutine;
+        private H4CombatHealth _health;
+        private Renderer[] _defenseRenderers;
+        private Color[] _defenseBaseColors;
+
+        public bool IsDefenseVisualActive { get; private set; }
+        public bool IsAreaPreviewActive { get; private set; }
 
         private void Awake()
         {
@@ -25,6 +32,7 @@ namespace Lumbre.Game.Client.Combat
 
             _audioSource.playOnAwake = false;
             _audioSource.spatialBlend = 0f;
+            _health = GetComponent<H4CombatHealth>();
             _ring = GetComponent<LineRenderer>();
             if (_ring == null)
             {
@@ -45,20 +53,43 @@ namespace Lumbre.Game.Client.Combat
             }
         }
 
+        private void OnEnable()
+        {
+            if (_health != null)
+            {
+                _health.Died += HandleDeath;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_health != null)
+            {
+                _health.Died -= HandleDeath;
+            }
+
+            StopDefenseVisual();
+            StopAreaVisual();
+        }
+
         public void PlayDefense(float duration)
         {
             PlayTone(420f, 0.14f, 0.22f);
-            StartCoroutine(DefensePulse(duration));
+            StopDefenseVisual();
+            _defenseRoutine = StartCoroutine(DefensePulse(duration));
+        }
+
+        public void PlayAreaPreview(float radius, float duration)
+        {
+            PlayTone(300f, 0.1f, 0.14f);
+            StopAreaVisual();
+            _ringRoutine = StartCoroutine(AreaPreview(radius, duration));
         }
 
         public void PlayArea(float radius)
         {
             PlayTone(760f, 0.18f, 0.24f);
-            if (_ringRoutine != null)
-            {
-                StopCoroutine(_ringRoutine);
-            }
-
+            StopAreaVisual();
             _ringRoutine = StartCoroutine(AreaRing(radius));
         }
 
@@ -87,19 +118,47 @@ namespace Lumbre.Game.Client.Combat
 
         private IEnumerator DefensePulse(float duration)
         {
-            var renderers = GetComponentsInChildren<Renderer>(true);
-            var original = new Color[renderers.Length];
-            for (var index = 0; index < renderers.Length; index++)
+            IsDefenseVisualActive = true;
+            _defenseRenderers = GetComponentsInChildren<Renderer>(true);
+            _defenseBaseColors = new Color[_defenseRenderers.Length];
+            for (var index = 0; index < _defenseRenderers.Length; index++)
             {
-                original[index] = renderers[index].material.color;
-                renderers[index].material.color = defenseColor;
+                if (_defenseRenderers[index] == _ring)
+                {
+                    continue;
+                }
+
+                _defenseBaseColors[index] = _defenseRenderers[index].material.color;
+                _defenseRenderers[index].material.color = defenseColor;
             }
 
-            yield return new WaitForSeconds(Mathf.Min(0.2f, Mathf.Max(0.05f, duration)));
-            for (var index = 0; index < renderers.Length; index++)
+            yield return new WaitForSeconds(Mathf.Max(0.05f, duration));
+            RestoreDefenseRenderers();
+            IsDefenseVisualActive = false;
+            _defenseRoutine = null;
+        }
+
+        private IEnumerator AreaPreview(float radius, float duration)
+        {
+            IsAreaPreviewActive = true;
+            _ring.enabled = true;
+            var previewColor = areaColor;
+            previewColor.a = 0.45f;
+            _ring.startColor = previewColor;
+            _ring.endColor = previewColor;
+            var elapsed = 0f;
+            var safeDuration = Mathf.Max(0.01f, duration);
+            while (elapsed < safeDuration)
             {
-                renderers[index].material.color = original[index];
+                var pulse = 0.92f + Mathf.Sin(elapsed * 18f) * 0.08f;
+                SetRing(radius * pulse);
+                elapsed += Time.deltaTime;
+                yield return null;
             }
+
+            _ring.enabled = false;
+            IsAreaPreviewActive = false;
+            _ringRoutine = null;
         }
 
         private IEnumerator AreaRing(float radius)
@@ -117,7 +176,58 @@ namespace Lumbre.Game.Client.Combat
             }
 
             _ring.enabled = false;
+            IsAreaPreviewActive = false;
             _ringRoutine = null;
+        }
+
+        private void StopDefenseVisual()
+        {
+            if (_defenseRoutine != null)
+            {
+                StopCoroutine(_defenseRoutine);
+                _defenseRoutine = null;
+            }
+
+            IsDefenseVisualActive = false;
+            RestoreDefenseRenderers();
+        }
+
+        private void StopAreaVisual()
+        {
+            if (_ringRoutine != null)
+            {
+                StopCoroutine(_ringRoutine);
+                _ringRoutine = null;
+            }
+
+            if (_ring != null)
+            {
+                _ring.enabled = false;
+            }
+
+            IsAreaPreviewActive = false;
+        }
+
+        private void HandleDeath()
+        {
+            StopDefenseVisual();
+            StopAreaVisual();
+        }
+
+        private void RestoreDefenseRenderers()
+        {
+            if (_defenseRenderers == null || _defenseBaseColors == null)
+            {
+                return;
+            }
+
+            for (var index = 0; index < _defenseRenderers.Length; index++)
+            {
+                if (_defenseRenderers[index] != null && _defenseRenderers[index] != _ring)
+                {
+                    _defenseRenderers[index].material.color = _defenseBaseColors[index];
+                }
+            }
         }
 
         private void SetRing(float radius)

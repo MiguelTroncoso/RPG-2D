@@ -24,6 +24,7 @@ namespace Lumbre.Game.Domain.Combat
         public int Damage => _damage;
         public float Radius => _radius;
         public float CooldownRemaining => _cooldown.Remaining;
+        public bool CanActivate => _cooldown.IsReady && _heat.CanSpend(_heatCost);
 
         public AbilityResult TryActivate()
         {

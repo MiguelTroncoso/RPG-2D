@@ -9190,7 +9190,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c8af9de58ac44e1a257606d9665106, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Client::Lumbre.Game.Client.GameSceneMarker
-  marker: H10PlayerControlAndTouchCombat
+  marker: H10_2GameFeelCombatFeedback
 --- !u!4 &1718546561
 Transform:
   m_ObjectHideFlags: 0

@@ -150,6 +150,11 @@ namespace Lumbre.Game.Client.Presentation
             Play(_uiClip, 0.1f);
         }
 
+        public void PlayRejected()
+        {
+            Play(_uiClip, 0.06f);
+        }
+
         private void EnsureAudio()
         {
             _oneShotSource = GetComponent<AudioSource>();

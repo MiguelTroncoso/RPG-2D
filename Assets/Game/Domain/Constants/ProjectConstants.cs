@@ -87,6 +87,15 @@ namespace Lumbre.Game.Domain.Constants
         public const int H5NaraGridY = 10;
         public const float H5InteractionRange = 1.65f;
 
+        public const float PlayerAttackWindupSeconds = 0.14f;
+        public const float PlayerAttackStrikeSeconds = 0.1f;
+        public const float PlayerAttackImpactSeconds = 0.08f;
+        public const float PlayerAttackRecoverySeconds = 0.16f;
+
+        public const float MordeluzStaggerSeconds = 0.28f;
+        public const float MordeluzKnockbackDistance = 0.15f;
+        public const float MordeluzKnockbackSeconds = 0.18f;
+
         public const int H6StartingLevel = 1;
         public const int H6MaximumLevel = 2;
         public const int H6ExperienceToLevelTwo = 100;

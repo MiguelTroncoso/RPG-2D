@@ -219,6 +219,10 @@ namespace Lumbre.Game.Tests
             try
             {
                 yield return PressGamepadButton(gamepad, GamepadButton.South);
+                // H10.3: damage lands at the visual impact, not on the press.
+                Assert.AreEqual(target.MaxHealth, target.CurrentHealth,
+                    "damage must not occur before the impact");
+                yield return WaitForAttackImpact(player);
                 Assert.That(target.CurrentHealth, Is.LessThan(target.MaxHealth));
             }
             finally
@@ -235,6 +239,7 @@ namespace Lumbre.Game.Tests
             var target = PrepareTarget(player, "Mordeluz");
 
             yield return PressTouchButton("H4_AttackButton");
+            yield return WaitForAttackImpact(player);
 
             Assert.That(target.CurrentHealth, Is.LessThan(target.MaxHealth));
         }
@@ -247,6 +252,7 @@ namespace Lumbre.Game.Tests
             var target = PrepareTarget(player, "Mordeluz");
 
             yield return PressTouchButton("H4_AttackButton");
+            yield return WaitForAttackImpact(player);
 
             Assert.AreEqual(target.MaxHealth - ProjectConstants.PlayerBasicAttackDamage,
                 target.CurrentHealth);
@@ -448,6 +454,20 @@ namespace Lumbre.Game.Tests
             InputSystem.QueueDeltaStateEvent(gamepad.leftStick, Vector2.zero);
             InputSystem.Update();
             yield return new WaitForFixedUpdate();
+        }
+
+        private static IEnumerator WaitForAttackImpact(GameObject player)
+        {
+            var combat = player.GetComponent<H4PlayerCombatController>();
+            var deadline = Time.time + combat.AttackSequenceSeconds + 0.2f;
+            // Wait until the deferred impact has resolved (sequence back to idle
+            // after firing its single damage event) or a safety deadline.
+            while (combat.IsAttackSequenceActive && Time.time < deadline)
+            {
+                yield return null;
+            }
+
+            yield return null;
         }
 
         private static IEnumerator PressGamepadButton(Gamepad gamepad, GamepadButton button)

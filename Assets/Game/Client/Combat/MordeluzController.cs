@@ -1,5 +1,6 @@
 using System;
 using Lumbre.Game.Domain.Combat;
+using Lumbre.Game.Domain.Constants;
 using UnityEngine;
 
 namespace Lumbre.Game.Client.Combat
@@ -14,14 +15,24 @@ namespace Lumbre.Game.Client.Combat
         [SerializeField, Min(0.1f)] private float attackRange = 1.05f;
         [SerializeField, Min(0.1f)] private float leashRange = 6.5f;
         [SerializeField, Min(0.1f)] private float movementSpeed = 1.2f;
+        [SerializeField, Min(0f)] private float staggerSeconds =
+            ProjectConstants.MordeluzStaggerSeconds;
+        [SerializeField, Min(0f)] private float knockbackDistance =
+            ProjectConstants.MordeluzKnockbackDistance;
+        [SerializeField, Min(0.01f)] private float knockbackSeconds =
+            ProjectConstants.MordeluzKnockbackSeconds;
 
         private Rigidbody2D _body;
         private MordeluzAiStateMachine _stateMachine;
         private Vector2 _spawnPosition;
+        private HitReactionModel _hitReaction;
 
         public event Action<MordeluzAiTransition> StateChanged;
 
         public MordeluzAiState CurrentState => _stateMachine?.Current ?? MordeluzAiState.Idle;
+
+        /// <summary>H10.3: true while the visible hit reaction interrupts the AI.</summary>
+        public bool IsStaggered => _hitReaction != null && _hitReaction.IsStaggered(Time.time);
         public Transform Target
         {
             get => target;
@@ -63,10 +74,13 @@ namespace Lumbre.Game.Client.Combat
             target ??= GameObject.FindWithTag("Player")?.transform;
             _spawnPosition = spawnPoint != null ? spawnPoint.position : transform.position;
             _stateMachine = new MordeluzAiStateMachine();
+            _hitReaction = new HitReactionModel(staggerSeconds, knockbackDistance,
+                knockbackSeconds);
             IgnoreTargetCollision();
             if (health != null)
             {
                 health.Died += HandleDeath;
+                health.DamageTaken += HandleDamageTaken;
             }
         }
 
@@ -75,6 +89,7 @@ namespace Lumbre.Game.Client.Combat
             if (health != null)
             {
                 health.Died -= HandleDeath;
+                health.DamageTaken -= HandleDamageTaken;
             }
         }
 
@@ -109,6 +124,7 @@ namespace Lumbre.Game.Client.Combat
             }
 
             if (_stateMachine.Current == MordeluzAiState.Attack && targetAlive
+                && !IsStaggered
                 && (distanceToTarget <= attackRange || HasPendingAttack))
             {
                 PerformAttack(targetHealth, distanceToTarget);
@@ -119,6 +135,19 @@ namespace Lumbre.Game.Client.Combat
         {
             if (_body == null || _stateMachine == null)
             {
+                return;
+            }
+
+            // H10.3 hit reaction: while staggered the enemy stops chasing and
+            // is pushed away from the damage source so the hit reads clearly.
+            if (IsStaggered)
+            {
+                var (knockX, knockY) = _hitReaction.TickDisplacement(Time.time);
+                if (Mathf.Abs(knockX) > 0f || Mathf.Abs(knockY) > 0f)
+                {
+                    _body.MovePosition(_body.position + new Vector2(knockX, knockY));
+                }
+
                 return;
             }
 
@@ -153,9 +182,23 @@ namespace Lumbre.Game.Client.Combat
             }
         }
 
+        private void HandleDamageTaken(DamageResult result)
+        {
+            if (_hitReaction == null || !result.Applied || result.Killed)
+            {
+                return;
+            }
+
+            var away = target != null
+                ? (Vector2)transform.position - (Vector2)target.position
+                : Vector2.right;
+            _hitReaction.ApplyHit(Time.time, away.x, away.y);
+        }
+
         private void HandleDeath()
         {
             _stateMachine?.SetDead();
+            _hitReaction?.Reset();
             if (_body != null)
             {
                 _body.linearVelocity = Vector2.zero;

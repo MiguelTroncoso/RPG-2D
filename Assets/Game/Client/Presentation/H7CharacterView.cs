@@ -2,6 +2,7 @@ using System;
 using Lumbre.Game.Client.Combat;
 using Lumbre.Game.Client.Player;
 using Lumbre.Game.Domain.Combat;
+using Lumbre.Game.Domain.Constants;
 using UnityEngine;
 
 namespace Lumbre.Game.Client.Presentation
@@ -63,6 +64,7 @@ namespace Lumbre.Game.Client.Presentation
             if (_playerCombat != null)
             {
                 _playerCombat.BasicAttackSucceeded += HandleBasicAttack;
+                _playerCombat.AttackPhaseChanged += HandleAttackPhase;
             }
 
             if (_abilities != null)
@@ -88,6 +90,7 @@ namespace Lumbre.Game.Client.Presentation
             if (_playerCombat != null)
             {
                 _playerCombat.BasicAttackSucceeded -= HandleBasicAttack;
+                _playerCombat.AttackPhaseChanged -= HandleAttackPhase;
             }
 
             if (_abilities != null)
@@ -104,8 +107,14 @@ namespace Lumbre.Game.Client.Presentation
 
         private void Update()
         {
-            if (_dead || Time.time < _transientUntil || animator == null)
+            if (_dead || animator == null)
             {
+                return;
+            }
+
+            if (Time.time < _transientUntil)
+            {
+                animator.speed = 1f;
                 return;
             }
 
@@ -114,6 +123,32 @@ namespace Lumbre.Game.Client.Presentation
                 : _enemyController != null && (_enemyController.CurrentState == MordeluzAiState.Follow
                     || _enemyController.CurrentState == MordeluzAiState.Return);
             SetState(moving ? "Walk" : "Idle");
+            SyncAnimatorSpeed(moving);
+        }
+
+        /// <summary>
+        /// H10.3: while walking, the Animator playback speed follows the real
+        /// physical speed so the semantic Walk state can never desync from
+        /// the locomotion (proportional to analog intensity as well).
+        /// </summary>
+        private void SyncAnimatorSpeed(bool moving)
+        {
+            if (_playerController == null)
+            {
+                animator.speed = 1f;
+                return;
+            }
+
+            if (!moving || !string.Equals(_currentState, "Walk", StringComparison.Ordinal))
+            {
+                animator.speed = 1f;
+                return;
+            }
+
+            var normalized = Mathf.Clamp01(
+                _playerController.CurrentWorldVelocity.magnitude
+                / Mathf.Max(0.01f, _playerController.MaxSpeed));
+            animator.speed = Mathf.Lerp(0.8f, 1.3f, normalized);
         }
 
         public void PlayTransient(string state, float duration)
@@ -152,7 +187,12 @@ namespace Lumbre.Game.Client.Presentation
         {
             if (!result.Killed)
             {
-                PlayTransient("Damage", 0.18f);
+                // Enemies hold the damage state for the whole H10.3 stagger
+                // window so the hit reaction stays on screen long enough.
+                var duration = _enemyController != null
+                    ? ProjectConstants.MordeluzStaggerSeconds
+                    : 0.18f;
+                PlayTransient("Damage", duration);
             }
         }
 
@@ -164,9 +204,20 @@ namespace Lumbre.Game.Client.Presentation
 
         private void HandleBasicAttack(AttackResult result)
         {
-            if (result.Succeeded)
+            // Input attacks are covered by HandleAttackPhase from windup to
+            // recovery; this path remains for programmatic QA attacks only.
+            if (result.Succeeded && (_playerCombat == null
+                || _playerCombat.CurrentAttackPhase == AttackPhase.Idle))
             {
                 PlayTransient("Attack", 0.28f);
+            }
+        }
+
+        private void HandleAttackPhase(AttackPhase phase)
+        {
+            if (phase == AttackPhase.Windup && _playerCombat != null)
+            {
+                PlayTransient("Attack", _playerCombat.AttackSequenceSeconds);
             }
         }
 
